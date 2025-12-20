@@ -1,14 +1,38 @@
 [
     {
+        "id":"color-beige",
+        "colorHeader":"#E8DFC9",
+        "colorBody":"#F2EBDD",
+        "colorText":"#18181A"
+    },
+    {
         "id":"color-yellow",
         "colorHeader":"#FFEFBE",
         "colorBody":"#FFF5DF",
         "colorText":"#18181A"
     },
     {
-        "id":"color-green",
-        "colorHeader":"#AFDA9F",
-        "colorBody":"#BCDEAF",
+        "id":"color-peach",
+        "colorHeader":"#FFD6B5",
+        "colorBody":"#FFE6D1",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-mint",
+        "colorHeader":"#BEE7D5",
+        "colorBody":"#D2F0E3",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-sage",
+        "colorHeader":"#C7D4B8",
+        "colorBody":"#DCE6D1",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-aqua",
+        "colorHeader":"#B7E3E4",
+        "colorBody":"#D0F0F1",
         "colorText":"#18181A"
     },
     {
@@ -18,9 +42,27 @@
         "colorText":"#18181A"
     },
     {
-        "id":"color-purple",
+        "id":"color-periwinkle",
+        "colorHeader":"#C6D3F0",
+        "colorBody":"#DEE6FA",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-lavender",
+        "colorHeader":"#D9D3F2",
+        "colorBody":"#E9E6FA",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-pink",
         "colorHeader":"#FED0FD",
         "colorBody":"#FEE5FD",
+        "colorText":"#18181A"
+    },
+    {
+        "id":"color-coral",
+        "colorHeader":"#F4B7A7",
+        "colorBody":"#F9D1C6",
         "colorText":"#18181A"
     }
 ]
