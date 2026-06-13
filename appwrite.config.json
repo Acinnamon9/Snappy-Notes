@@ -1,0 +1,112 @@
+{
+    "organizationId": "6745b3c0001cc038f26e",
+    "projectId": "6745b3cf0008eecd557a",
+    "projectName": "Notes-App",
+    "endpoint": "https://fra.cloud.appwrite.io/v1",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "protocols": {
+            "rest": true,
+            "graphql": true,
+            "websocket": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": 0,
+                "sessionsLimit": 10,
+                "passwordHistory": 0,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "tablesDB": [
+        {
+            "$id": "6745b4fa0017647a1c45",
+            "name": "dev",
+            "enabled": true
+        }
+    ],
+    "tables": [
+        {
+            "$id": "6745b5040010eff5395d",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "databaseId": "6745b4fa0017647a1c45",
+            "name": "notes",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "body",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "colors",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 150,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "position",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "dueAt",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                },
+                {
+                    "key": "completed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                }
+            ],
+            "indexes": []
+        }
+    ]
+}

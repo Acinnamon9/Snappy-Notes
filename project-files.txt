@@ -1,8 +1,124 @@
 # Selected Project Files
 
 Root: S:/Snappy-Notes
-Generated: 2026-06-14 01:35:33
+Generated: 2026-06-14 01:50:52
 
+
+========================================================================================
+FILE: appwrite.config.json
+========================================================================================
+   1 | {
+   2 |     "organizationId": "6745b3c0001cc038f26e",
+   3 |     "projectId": "6745b3cf0008eecd557a",
+   4 |     "projectName": "Notes-App",
+   5 |     "endpoint": "https://fra.cloud.appwrite.io/v1",
+   6 |     "settings": {
+   7 |         "services": {
+   8 |             "account": true,
+   9 |             "avatars": true,
+  10 |             "databases": true,
+  11 |             "locale": true,
+  12 |             "health": true,
+  13 |             "storage": true,
+  14 |             "teams": true,
+  15 |             "users": true,
+  16 |             "sites": true,
+  17 |             "functions": true,
+  18 |             "graphql": true,
+  19 |             "messaging": true
+  20 |         },
+  21 |         "protocols": {
+  22 |             "rest": true,
+  23 |             "graphql": true,
+  24 |             "websocket": true
+  25 |         },
+  26 |         "auth": {
+  27 |             "methods": {
+  28 |                 "jwt": true,
+  29 |                 "phone": true,
+  30 |                 "invites": true,
+  31 |                 "anonymous": true,
+  32 |                 "email-otp": true,
+  33 |                 "magic-url": true,
+  34 |                 "email-password": true
+  35 |             },
+  36 |             "security": {
+  37 |                 "duration": 31536000,
+  38 |                 "limit": 0,
+  39 |                 "sessionsLimit": 10,
+  40 |                 "passwordHistory": 0,
+  41 |                 "passwordDictionary": false,
+  42 |                 "personalDataCheck": false,
+  43 |                 "sessionAlerts": false,
+  44 |                 "mockNumbers": []
+  45 |             }
+  46 |         }
+  47 |     },
+  48 |     "tablesDB": [
+  49 |         {
+  50 |             "$id": "6745b4fa0017647a1c45",
+  51 |             "name": "dev",
+  52 |             "enabled": true
+  53 |         }
+  54 |     ],
+  55 |     "tables": [
+  56 |         {
+  57 |             "$id": "6745b5040010eff5395d",
+  58 |             "$permissions": [
+  59 |                 "create(\"users\")"
+  60 |             ],
+  61 |             "databaseId": "6745b4fa0017647a1c45",
+  62 |             "name": "notes",
+  63 |             "enabled": true,
+  64 |             "rowSecurity": true,
+  65 |             "columns": [
+  66 |                 {
+  67 |                     "key": "body",
+  68 |                     "type": "string",
+  69 |                     "required": false,
+  70 |                     "array": false,
+  71 |                     "size": 100,
+  72 |                     "default": null,
+  73 |                     "encrypt": false
+  74 |                 },
+  75 |                 {
+  76 |                     "key": "colors",
+  77 |                     "type": "string",
+  78 |                     "required": true,
+  79 |                     "array": false,
+  80 |                     "size": 150,
+  81 |                     "default": null,
+  82 |                     "encrypt": false
+  83 |                 },
+  84 |                 {
+  85 |                     "key": "position",
+  86 |                     "type": "string",
+  87 |                     "required": true,
+  88 |                     "array": false,
+  89 |                     "size": 20,
+  90 |                     "default": null,
+  91 |                     "encrypt": false
+  92 |                 },
+  93 |                 {
+  94 |                     "key": "dueAt",
+  95 |                     "type": "datetime",
+  96 |                     "required": false,
+  97 |                     "array": false,
+  98 |                     "default": null,
+  99 |                     "format": ""
+ 100 |                 },
+ 101 |                 {
+ 102 |                     "key": "completed",
+ 103 |                     "type": "boolean",
+ 104 |                     "required": false,
+ 105 |                     "array": false,
+ 106 |                     "default": false
+ 107 |                 }
+ 108 |             ],
+ 109 |             "indexes": []
+ 110 |         }
+ 111 |     ]
+ 112 | }
 
 ========================================================================================
 FILE: src/components/AddButton.jsx
@@ -11,7 +127,7 @@ FILE: src/components/AddButton.jsx
    2 | 
    3 | import Plus from "../icons/Plus";
    4 | import colors from "../assets/colors.json";
-   5 | import { useNotes } from "../context/NotesContext";
+   5 | import { useNotes } from "../context/notesContext";
    6 | 
    7 | const AddButton = () => {
    8 |     const { createNote } = useNotes();
@@ -93,195 +209,256 @@ FILE: src/components/NoteCard.jsx
   28 | };
   29 | 
   30 | const NoteCard = ({ note }) => {
-  31 |     const { setSelectedNoteId, updateNote } = useNotes();
-  32 | 
-  33 |     const cardRef = useRef(null);
-  34 |     const textAreaRef = useRef(null);
-  35 |     const saveTimerRef = useRef(null);
-  36 |     const mouseStartPosition = useRef({
-  37 |         x: 0,
-  38 |         y: 0,
-  39 |     });
-  40 | 
-  41 |     const [saving, setSaving] = useState(false);
-  42 | 
-  43 |     const [position, setPosition] = useState(() =>
-  44 |         parseStoredJson(note.position, DEFAULT_POSITION)
-  45 |     );
-  46 | 
-  47 |     const colors = parseStoredJson(
-  48 |         note.colors,
-  49 |         DEFAULT_COLORS
+  31 |     const {
+  32 |         focusNoteId,
+  33 |         setSelectedNoteId,
+  34 |         clearFocusNote,
+  35 |         updateNote,
+  36 |     } = useNotes();
+  37 | 
+  38 |     const cardRef = useRef(null);
+  39 |     const textAreaRef = useRef(null);
+  40 |     const saveTimerRef = useRef(null);
+  41 |     const mouseStartPosition = useRef({
+  42 |         x: 0,
+  43 |         y: 0,
+  44 |     });
+  45 | 
+  46 |     const [saving, setSaving] = useState(false);
+  47 | 
+  48 |     const [position, setPosition] = useState(() =>
+  49 |         parseStoredJson(note.position, DEFAULT_POSITION)
   50 |     );
   51 | 
-  52 |     const body = bodyParser(note.body);
-  53 | 
-  54 |     useEffect(() => {
-  55 |         autoGrow(textAreaRef);
-  56 |         setZIndex(cardRef.current);
-  57 | 
-  58 |         return () => {
-  59 |             if (saveTimerRef.current) {
-  60 |                 clearTimeout(saveTimerRef.current);
-  61 |             }
-  62 |         };
-  63 |     }, []);
-  64 | 
-  65 |     const saveData = async (key, value) => {
-  66 |         await updateNote(note.$id, {
-  67 |             [key]: JSON.stringify(value),
-  68 |         });
-  69 |     };
-  70 | 
-  71 |     const handleMouseMove = (event) => {
-  72 |         event.preventDefault();
-  73 | 
-  74 |         const mouseMovement = {
-  75 |             x: mouseStartPosition.current.x - event.clientX,
-  76 |             y: mouseStartPosition.current.y - event.clientY,
-  77 |         };
-  78 | 
-  79 |         mouseStartPosition.current = {
-  80 |             x: event.clientX,
-  81 |             y: event.clientY,
-  82 |         };
-  83 | 
-  84 |         const nextPosition = setNewOffset(
-  85 |             cardRef.current,
-  86 |             mouseMovement
-  87 |         );
+  52 |     const colors = parseStoredJson(
+  53 |         note.colors,
+  54 |         DEFAULT_COLORS
+  55 |     );
+  56 | 
+  57 |     const body = bodyParser(note.body);
+  58 | 
+  59 |     useEffect(() => {
+  60 |         autoGrow(textAreaRef);
+  61 |         setZIndex(cardRef.current);
+  62 | 
+  63 |         return () => {
+  64 |             if (saveTimerRef.current) {
+  65 |                 clearTimeout(saveTimerRef.current);
+  66 |             }
+  67 |         };
+  68 |     }, []);
+  69 | 
+  70 |     useEffect(() => {
+  71 |         if (focusNoteId !== note.$id) {
+  72 |             return;
+  73 |         }
+  74 | 
+  75 |         const textarea = textAreaRef.current;
+  76 | 
+  77 |         if (!textarea) {
+  78 |             return;
+  79 |         }
+  80 | 
+  81 |         textarea.focus();
+  82 | 
+  83 |         const caretPosition = textarea.value.length;
+  84 |         textarea.setSelectionRange(caretPosition, caretPosition);
+  85 | 
+  86 |         clearFocusNote(note.$id);
+  87 |     }, [clearFocusNote, focusNoteId, note.$id]);
   88 | 
-  89 |         setPosition(nextPosition);
-  90 |     };
-  91 | 
-  92 |     const handleMouseUp = () => {
-  93 |         document.removeEventListener(
-  94 |             "mousemove",
-  95 |             handleMouseMove
-  96 |         );
+  89 |     const saveData = async (key, value) => {
+  90 |         await updateNote(note.$id, {
+  91 |             [key]: JSON.stringify(value),
+  92 |         });
+  93 |     };
+  94 | 
+  95 |     const handleMouseMove = (event) => {
+  96 |         event.preventDefault();
   97 | 
-  98 |         document.removeEventListener(
-  99 |             "mouseup",
- 100 |             handleMouseUp
- 101 |         );
+  98 |         const mouseMovement = {
+  99 |             x: mouseStartPosition.current.x - event.clientX,
+ 100 |             y: mouseStartPosition.current.y - event.clientY,
+ 101 |         };
  102 | 
- 103 |         const nextPosition = setNewOffset(cardRef.current);
- 104 | 
- 105 |         void saveData("position", nextPosition).catch((error) => {
- 106 |             console.error("Failed to save note position:", error);
- 107 |         });
- 108 |     };
- 109 | 
- 110 |     const handleMouseDown = (event) => {
- 111 |         if (event.button !== 0) {
- 112 |             return;
- 113 |         }
- 114 | 
- 115 |         mouseStartPosition.current = {
- 116 |             x: event.clientX,
- 117 |             y: event.clientY,
- 118 |         };
- 119 | 
- 120 |         setSelectedNoteId(note.$id);
- 121 |         setZIndex(cardRef.current);
- 122 | 
- 123 |         document.addEventListener(
- 124 |             "mousemove",
- 125 |             handleMouseMove
- 126 |         );
- 127 | 
- 128 |         document.addEventListener(
- 129 |             "mouseup",
- 130 |             handleMouseUp
- 131 |         );
+ 103 |         mouseStartPosition.current = {
+ 104 |             x: event.clientX,
+ 105 |             y: event.clientY,
+ 106 |         };
+ 107 | 
+ 108 |         const nextPosition = setNewOffset(
+ 109 |             cardRef.current,
+ 110 |             mouseMovement
+ 111 |         );
+ 112 | 
+ 113 |         setPosition(nextPosition);
+ 114 |     };
+ 115 | 
+ 116 |     const handleMouseUp = () => {
+ 117 |         document.removeEventListener(
+ 118 |             "mousemove",
+ 119 |             handleMouseMove
+ 120 |         );
+ 121 | 
+ 122 |         document.removeEventListener(
+ 123 |             "mouseup",
+ 124 |             handleMouseUp
+ 125 |         );
+ 126 | 
+ 127 |         const nextPosition = setNewOffset(cardRef.current);
+ 128 | 
+ 129 |         void saveData("position", nextPosition).catch((error) => {
+ 130 |             console.error("Failed to save note position:", error);
+ 131 |         });
  132 |     };
  133 | 
- 134 |     const handleInput = () => {
- 135 |         autoGrow(textAreaRef);
- 136 |         setSaving(true);
- 137 | 
- 138 |         if (saveTimerRef.current) {
- 139 |             clearTimeout(saveTimerRef.current);
- 140 |         }
- 141 | 
- 142 |         saveTimerRef.current = setTimeout(
- 143 |             async () => {
- 144 |                 try {
- 145 |                     await saveData(
- 146 |                         "body",
- 147 |                         textAreaRef.current.value
- 148 |                     );
- 149 |                 } catch (error) {
- 150 |                     console.error(
- 151 |                         "Failed to save note body:",
- 152 |                         error
- 153 |                     );
- 154 |                 } finally {
- 155 |                     setSaving(false);
- 156 |                 }
- 157 |             },
- 158 |             1200
- 159 |         );
- 160 |     };
+ 134 |     const handleMouseDown = (event) => {
+ 135 |         if (event.button !== 0) {
+ 136 |             return;
+ 137 |         }
+ 138 | 
+ 139 |         mouseStartPosition.current = {
+ 140 |             x: event.clientX,
+ 141 |             y: event.clientY,
+ 142 |         };
+ 143 | 
+ 144 |         setSelectedNoteId(note.$id);
+ 145 |         setZIndex(cardRef.current);
+ 146 | 
+ 147 |         document.addEventListener(
+ 148 |             "mousemove",
+ 149 |             handleMouseMove
+ 150 |         );
+ 151 | 
+ 152 |         document.addEventListener(
+ 153 |             "mouseup",
+ 154 |             handleMouseUp
+ 155 |         );
+ 156 |     };
+ 157 | 
+ 158 |     const handleInput = () => {
+ 159 |         autoGrow(textAreaRef);
+ 160 |         setSaving(true);
  161 | 
- 162 |     return (
- 163 |         <article
- 164 |             ref={cardRef}
- 165 |             className="card"
- 166 |             style={{
- 167 |                 left: `${position.x}px`,
- 168 |                 top: `${position.y}px`,
- 169 |                 backgroundColor: colors.colorBody,
- 170 |             }}
- 171 |         >
- 172 |             <header
- 173 |                 className="card-header"
- 174 |                 onMouseDown={handleMouseDown}
- 175 |                 style={{
- 176 |                     backgroundColor: colors.colorHeader,
- 177 |                 }}
- 178 |             >
- 179 |                 <DeleteButton noteId={note.$id} />
- 180 | 
- 181 |                 {saving && (
- 182 |                     <div className="card-saving">
- 183 |                         <Spinner color={colors.colorText} />
- 184 |                         <span style={{ color: colors.colorText }}>
- 185 |                             Saving...
- 186 |                         </span>
- 187 |                     </div>
- 188 |                 )}
- 189 |             </header>
- 190 | 
- 191 |             <div className="card-body">
- 192 |                 <textarea
- 193 |                     ref={textAreaRef}
- 194 |                     defaultValue={body}
- 195 |                     aria-label="Note body"
- 196 |                     onFocus={() => {
- 197 |                         setZIndex(cardRef.current);
- 198 |                         setSelectedNoteId(note.$id);
- 199 |                     }}
- 200 |                     onInput={handleInput}
- 201 |                     style={{
- 202 |                         color: colors.colorText,
- 203 |                     }}
- 204 |                 />
- 205 |             </div>
- 206 |         </article>
- 207 |     );
- 208 | };
- 209 | 
- 210 | NoteCard.propTypes = {
- 211 |     note: PropTypes.shape({
- 212 |         $id: PropTypes.string.isRequired,
- 213 |         position: PropTypes.string,
- 214 |         colors: PropTypes.string,
- 215 |         body: PropTypes.string,
- 216 |     }).isRequired,
- 217 | };
- 218 | 
- 219 | export default NoteCard;
+ 162 |         if (saveTimerRef.current) {
+ 163 |             clearTimeout(saveTimerRef.current);
+ 164 |         }
+ 165 | 
+ 166 |         saveTimerRef.current = setTimeout(
+ 167 |             async () => {
+ 168 |                 try {
+ 169 |                     await saveData(
+ 170 |                         "body",
+ 171 |                         textAreaRef.current.value
+ 172 |                     );
+ 173 |                 } catch (error) {
+ 174 |                     console.error(
+ 175 |                         "Failed to save note body:",
+ 176 |                         error
+ 177 |                     );
+ 178 |                 } finally {
+ 179 |                     setSaving(false);
+ 180 |                 }
+ 181 |             },
+ 182 |             1200
+ 183 |         );
+ 184 |     };
+ 185 | 
+ 186 |     return (
+ 187 |         <article
+ 188 |             ref={cardRef}
+ 189 |             className="card"
+ 190 |             style={{
+ 191 |                 left: `${position.x}px`,
+ 192 |                 top: `${position.y}px`,
+ 193 |                 backgroundColor: colors.colorBody,
+ 194 |             }}
+ 195 |         >
+ 196 |             <header
+ 197 |                 className="card-header"
+ 198 |                 onMouseDown={handleMouseDown}
+ 199 |                 style={{
+ 200 |                     backgroundColor: colors.colorHeader,
+ 201 |                 }}
+ 202 |             >
+ 203 |                 <DeleteButton noteId={note.$id} />
+ 204 | 
+ 205 |                 {saving && (
+ 206 |                     <div className="card-saving">
+ 207 |                         <Spinner color={colors.colorText} />
+ 208 |                         <span style={{ color: colors.colorText }}>
+ 209 |                             Saving...
+ 210 |                         </span>
+ 211 |                     </div>
+ 212 |                 )}
+ 213 |             </header>
+ 214 | 
+ 215 |             <div className="card-body">
+ 216 |                 <textarea
+ 217 |                     ref={textAreaRef}
+ 218 |                     defaultValue={body}
+ 219 |                     aria-label="Note body"
+ 220 |                     onFocus={() => {
+ 221 |                         setZIndex(cardRef.current);
+ 222 |                         setSelectedNoteId(note.$id);
+ 223 |                     }}
+ 224 |                     onInput={handleInput}
+ 225 |                     style={{
+ 226 |                         color: colors.colorText,
+ 227 |                     }}
+ 228 |                 />
+ 229 |             </div>
+ 230 |         </article>
+ 231 |     );
+ 232 | };
+ 233 | 
+ 234 | NoteCard.propTypes = {
+ 235 |     note: PropTypes.shape({
+ 236 |         $id: PropTypes.string.isRequired,
+ 237 |         position: PropTypes.string,
+ 238 |         colors: PropTypes.string,
+ 239 |         body: PropTypes.string,
+ 240 |     }).isRequired,
+ 241 | };
+ 242 | 
+ 243 | export default NoteCard;
+
+========================================================================================
+FILE: src/components/NotesBoard.jsx
+========================================================================================
+   1 | import { Link } from "react-router-dom";
+   2 | 
+   3 | import Controls from "./Controls";
+   4 | import NoteCard from "./NoteCard";
+   5 | import { useNotes } from "../context/NotesContext";
+   6 | 
+   7 | const NotesBoard = () => {
+   8 |     const { notes } = useNotes();
+   9 | 
+  10 |     return (
+  11 |         <main className="notes-board">
+  12 |             <nav className="board-navigation">
+  13 |                 <Link to="/notes">Notes</Link>
+  14 |                 <Link to="/settings">Settings</Link>
+  15 |             </nav>
+  16 | 
+  17 |             {notes.length === 0 && (
+  18 |                 <div className="empty-board-message">
+  19 |                     <strong>No notes yet</strong>
+  20 |                     <span>Use the plus button to create one.</span>
+  21 |                 </div>
+  22 |             )}
+  23 | 
+  24 |             {notes.map((note) => (
+  25 |                 <NoteCard key={note.$id} note={note} />
+  26 |             ))}
+  27 | 
+  28 |             <Controls />
+  29 |         </main>
+  30 |     );
+  31 | };
+  32 | 
+  33 | export default NotesBoard;
 
 ========================================================================================
 FILE: src/context/NotesProvider.jsx
@@ -304,126 +481,800 @@ FILE: src/context/NotesProvider.jsx
   16 | 
   17 |     const [notes, setNotes] = useState([]);
   18 |     const [selectedNoteId, setSelectedNoteId] = useState(null);
-  19 |     const [loading, setLoading] = useState(true);
-  20 |     const [loadError, setLoadError] = useState(null);
-  21 | 
-  22 |     const loadNotes = useCallback(async () => {
-  23 |         setLoading(true);
-  24 |         setLoadError(null);
-  25 | 
-  26 |         try {
-  27 |             const loadedNotes = await notesService.list();
-  28 |             setNotes(loadedNotes);
-  29 |         } catch (error) {
-  30 |             console.error("Failed to load notes:", error);
-  31 |             setLoadError(error);
-  32 |         } finally {
-  33 |             setLoading(false);
-  34 |         }
-  35 |     }, []);
-  36 | 
-  37 |     useEffect(() => {
-  38 |         void loadNotes();
-  39 |     }, [loadNotes]);
-  40 | 
-  41 |     const createNote = useCallback(
-  42 |         async (payload) => {
-  43 |             const createdNote = await notesService.create(
-  44 |                 payload,
-  45 |                 user.$id
-  46 |             );
-  47 | 
-  48 |             setNotes((currentNotes) => [
-  49 |                 createdNote,
-  50 |                 ...currentNotes,
-  51 |             ]);
-  52 | 
-  53 |             return createdNote;
-  54 |         },
-  55 |         [user]
-  56 |     );
-  57 | 
-  58 |     const updateNote = useCallback(async (id, payload) => {
-  59 |         const updatedNote = await notesService.update(id, payload);
-  60 | 
-  61 |         setNotes((currentNotes) =>
-  62 |             currentNotes.map((note) =>
-  63 |                 note.$id === id
-  64 |                     ? { ...note, ...updatedNote }
-  65 |                     : note
-  66 |             )
-  67 |         );
-  68 | 
-  69 |         return updatedNote;
-  70 |     }, []);
-  71 | 
-  72 |     const deleteNote = useCallback(async (id) => {
-  73 |         await notesService.remove(id);
-  74 | 
-  75 |         setNotes((currentNotes) =>
-  76 |             currentNotes.filter((note) => note.$id !== id)
-  77 |         );
+  19 |     const [focusNoteId, setFocusNoteId] = useState(null);
+  20 |     const [loading, setLoading] = useState(true);
+  21 |     const [loadError, setLoadError] = useState(null);
+  22 | 
+  23 |     const loadNotes = useCallback(async () => {
+  24 |         setLoading(true);
+  25 |         setLoadError(null);
+  26 | 
+  27 |         try {
+  28 |             const loadedNotes = await notesService.list();
+  29 |             setNotes(loadedNotes);
+  30 |         } catch (error) {
+  31 |             console.error("Failed to load notes:", error);
+  32 |             setLoadError(error);
+  33 |         } finally {
+  34 |             setLoading(false);
+  35 |         }
+  36 |     }, []);
+  37 | 
+  38 |     useEffect(() => {
+  39 |         void loadNotes();
+  40 |     }, [loadNotes]);
+  41 | 
+  42 |     const createNote = useCallback(
+  43 |         async (payload) => {
+  44 |             const createdNote = await notesService.create(
+  45 |                 payload,
+  46 |                 user.$id
+  47 |             );
+  48 | 
+  49 |             setNotes((currentNotes) => [
+  50 |                 createdNote,
+  51 |                 ...currentNotes,
+  52 |             ]);
+  53 | 
+  54 |             setSelectedNoteId(createdNote.$id);
+  55 |             setFocusNoteId(createdNote.$id);
+  56 | 
+  57 |             return createdNote;
+  58 |         },
+  59 |         [user]
+  60 |     );
+  61 | 
+  62 |     const updateNote = useCallback(async (id, payload) => {
+  63 |         const updatedNote = await notesService.update(id, payload);
+  64 | 
+  65 |         setNotes((currentNotes) =>
+  66 |             currentNotes.map((note) =>
+  67 |                 note.$id === id
+  68 |                     ? { ...note, ...updatedNote }
+  69 |                     : note
+  70 |             )
+  71 |         );
+  72 | 
+  73 |         return updatedNote;
+  74 |     }, []);
+  75 | 
+  76 |     const deleteNote = useCallback(async (id) => {
+  77 |         await notesService.remove(id);
   78 | 
-  79 |         setSelectedNoteId((currentId) =>
-  80 |             currentId === id ? null : currentId
+  79 |         setNotes((currentNotes) =>
+  80 |             currentNotes.filter((note) => note.$id !== id)
   81 |         );
-  82 |     }, []);
-  83 | 
-  84 |     const contextValue = useMemo(
-  85 |         () => ({
-  86 |             notes,
-  87 |             selectedNoteId,
-  88 |             setSelectedNoteId,
-  89 |             createNote,
-  90 |             updateNote,
-  91 |             deleteNote,
-  92 |             reloadNotes: loadNotes,
-  93 |         }),
-  94 |         [
-  95 |             notes,
-  96 |             selectedNoteId,
-  97 |             createNote,
-  98 |             updateNote,
-  99 |             deleteNote,
- 100 |             loadNotes,
- 101 |         ]
- 102 |     );
- 103 | 
- 104 |     if (loading) {
- 105 |         return (
- 106 |             <div className="page-state">
- 107 |                 <Spinner size="64" />
- 108 |                 <p>Loading notes...</p>
- 109 |             </div>
- 110 |         );
- 111 |     }
- 112 | 
- 113 |     if (loadError) {
- 114 |         return (
- 115 |             <div className="page-state">
- 116 |                 <h1>Could not load notes</h1>
- 117 |                 <p>{loadError.message || "The notes request failed."}</p>
- 118 | 
- 119 |                 <button
- 120 |                     type="button"
- 121 |                     className="primary-button"
- 122 |                     onClick={loadNotes}
- 123 |                 >
- 124 |                     Try again
- 125 |                 </button>
- 126 |             </div>
- 127 |         );
- 128 |     }
- 129 | 
- 130 |     return (
- 131 |         <NotesContext.Provider value={contextValue}>
- 132 |             {children}
- 133 |         </NotesContext.Provider>
- 134 |     );
- 135 | };
+  82 | 
+  83 |         setSelectedNoteId((currentId) =>
+  84 |             currentId === id ? null : currentId
+  85 |         );
+  86 | 
+  87 |         setFocusNoteId((currentId) =>
+  88 |             currentId === id ? null : currentId
+  89 |         );
+  90 |     }, []);
+  91 | 
+  92 |     const clearFocusNote = useCallback((id) => {
+  93 |         setFocusNoteId((currentId) =>
+  94 |             currentId === id ? null : currentId
+  95 |         );
+  96 |     }, []);
+  97 | 
+  98 |     const contextValue = useMemo(
+  99 |         () => ({
+ 100 |             notes,
+ 101 |             selectedNoteId,
+ 102 |             focusNoteId,
+ 103 |             setSelectedNoteId,
+ 104 |             clearFocusNote,
+ 105 |             createNote,
+ 106 |             updateNote,
+ 107 |             deleteNote,
+ 108 |             reloadNotes: loadNotes,
+ 109 |         }),
+ 110 |         [
+ 111 |             notes,
+ 112 |             selectedNoteId,
+ 113 |             focusNoteId,
+ 114 |             clearFocusNote,
+ 115 |             createNote,
+ 116 |             updateNote,
+ 117 |             deleteNote,
+ 118 |             loadNotes,
+ 119 |         ]
+ 120 |     );
+ 121 | 
+ 122 |     if (loading) {
+ 123 |         return (
+ 124 |             <div className="page-state">
+ 125 |                 <Spinner size="64" />
+ 126 |                 <p>Loading notes...</p>
+ 127 |             </div>
+ 128 |         );
+ 129 |     }
+ 130 | 
+ 131 |     if (loadError) {
+ 132 |         return (
+ 133 |             <div className="page-state">
+ 134 |                 <h1>Could not load notes</h1>
+ 135 |                 <p>{loadError.message || "The notes request failed."}</p>
  136 | 
- 137 | NotesProvider.propTypes = {
- 138 |     children: PropTypes.node.isRequired,
- 139 | };
- 140 | 
- 141 | export default NotesProvider;
+ 137 |                 <button
+ 138 |                     type="button"
+ 139 |                     className="primary-button"
+ 140 |                     onClick={loadNotes}
+ 141 |                 >
+ 142 |                     Try again
+ 143 |                 </button>
+ 144 |             </div>
+ 145 |         );
+ 146 |     }
+ 147 | 
+ 148 |     return (
+ 149 |         <NotesContext.Provider value={contextValue}>
+ 150 |             {children}
+ 151 |         </NotesContext.Provider>
+ 152 |     );
+ 153 | };
+ 154 | 
+ 155 | NotesProvider.propTypes = {
+ 156 |     children: PropTypes.node.isRequired,
+ 157 | };
+ 158 | 
+ 159 | export default NotesProvider;
+
+========================================================================================
+FILE: src/index.css
+========================================================================================
+   1 | :root {
+   2 |     font-family:
+   3 |         Inter,
+   4 |         system-ui,
+   5 |         -apple-system,
+   6 |         BlinkMacSystemFont,
+   7 |         "Segoe UI",
+   8 |         sans-serif;
+   9 | 
+  10 |     color: #18181a;
+  11 |     background: #f3f4f6;
+  12 |     font-synthesis: none;
+  13 |     text-rendering: optimizeLegibility;
+  14 |     -webkit-font-smoothing: antialiased;
+  15 |     -moz-osx-font-smoothing: grayscale;
+  16 |     --spinner-animation-speed: 2s;
+  17 | }
+  18 | 
+  19 | * {
+  20 |     box-sizing: border-box;
+  21 | }
+  22 | 
+  23 | html,
+  24 | body,
+  25 | #root {
+  26 |     min-width: 100%;
+  27 |     min-height: 100%;
+  28 |     margin: 0;
+  29 | }
+  30 | 
+  31 | button,
+  32 | textarea,
+  33 | input {
+  34 |     font: inherit;
+  35 | }
+  36 | 
+  37 | button {
+  38 |     border: 0;
+  39 | }
+  40 | 
+  41 | a {
+  42 |     color: inherit;
+  43 | }
+  44 | 
+  45 | @keyframes spin {
+  46 |     from {
+  47 |         transform: rotate(0deg);
+  48 |     }
+  49 | 
+  50 |     to {
+  51 |         transform: rotate(360deg);
+  52 |     }
+  53 | }
+  54 | 
+  55 | .spinner {
+  56 |     animation:
+  57 |         spin
+  58 |         var(--spinner-animation-speed)
+  59 |         linear
+  60 |         infinite;
+  61 | }
+  62 | 
+  63 | .notes-board {
+  64 |     position: relative;
+  65 |     width: 100%;
+  66 |     height: 100vh;
+  67 |     overflow: auto;
+  68 | 
+  69 |     background-color: #212228;
+  70 |     background-image:
+  71 |         linear-gradient(
+  72 |             #292a30 0.1em,
+  73 |             transparent 0.1em
+  74 |         ),
+  75 |         linear-gradient(
+  76 |             90deg,
+  77 |             #292a30 0.1em,
+  78 |             transparent 0.1em
+  79 |         );
+  80 | 
+  81 |     background-size: 4em 4em;
+  82 | }
+  83 | 
+  84 | .board-navigation {
+  85 |     position: fixed;
+  86 |     top: 16px;
+  87 |     right: 20px;
+  88 |     z-index: 10000;
+  89 | 
+  90 |     display: flex;
+  91 |     gap: 8px;
+  92 |     padding: 6px;
+  93 | 
+  94 |     background: rgba(53, 54, 62, 0.94);
+  95 |     border: 1px solid rgba(255, 255, 255, 0.08);
+  96 |     border-radius: 12px;
+  97 | 
+  98 |     box-shadow:
+  99 |         0 8px 24px rgba(0, 0, 0, 0.18);
+ 100 | }
+ 101 | 
+ 102 | .board-navigation a {
+ 103 |     padding: 8px 12px;
+ 104 |     color: #f7f7f8;
+ 105 |     text-decoration: none;
+ 106 |     border-radius: 8px;
+ 107 | }
+ 108 | 
+ 109 | .board-navigation a:hover {
+ 110 |     background: rgba(255, 255, 255, 0.1);
+ 111 | }
+ 112 | 
+ 113 | .empty-board-message {
+ 114 |     position: absolute;
+ 115 |     top: 50%;
+ 116 |     left: 50%;
+ 117 | 
+ 118 |     display: flex;
+ 119 |     flex-direction: column;
+ 120 |     gap: 5px;
+ 121 | 
+ 122 |     padding: 18px 22px;
+ 123 |     color: #b8bac3;
+ 124 |     text-align: center;
+ 125 | 
+ 126 |     transform: translate(-50%, -50%);
+ 127 | }
+ 128 | 
+ 129 | .empty-board-message strong {
+ 130 |     color: #ffffff;
+ 131 |     font-size: 18px;
+ 132 | }
+ 133 | 
+ 134 | .card {
+ 135 |     position: absolute;
+ 136 |     width: 400px;
+ 137 |     max-width: calc(100vw - 32px);
+ 138 | 
+ 139 |     overflow: hidden;
+ 140 |     cursor: default;
+ 141 |     border-radius: 6px;
+ 142 | 
+ 143 |     box-shadow:
+ 144 |         0 1px 1px hsl(0deg 0% 0% / 0.075),
+ 145 |         0 2px 2px hsl(0deg 0% 0% / 0.075),
+ 146 |         0 4px 4px hsl(0deg 0% 0% / 0.075),
+ 147 |         0 8px 8px hsl(0deg 0% 0% / 0.075),
+ 148 |         0 16px 16px hsl(0deg 0% 0% / 0.075);
+ 149 | }
+ 150 | 
+ 151 | .card-header {
+ 152 |     display: flex;
+ 153 |     align-items: center;
+ 154 |     justify-content: space-between;
+ 155 | 
+ 156 |     min-height: 34px;
+ 157 |     padding: 5px 7px;
+ 158 |     cursor: grab;
+ 159 |     user-select: none;
+ 160 | }
+ 161 | 
+ 162 | .card-header:active {
+ 163 |     cursor: grabbing;
+ 164 | }
+ 165 | 
+ 166 | .card-saving {
+ 167 |     display: flex;
+ 168 |     align-items: center;
+ 169 |     gap: 5px;
+ 170 |     font-size: 13px;
+ 171 | }
+ 172 | 
+ 173 | .card-body {
+ 174 |     padding: 1em;
+ 175 | }
+ 176 | 
+ 177 | .card-body textarea {
+ 178 |     display: block;
+ 179 |     width: 100%;
+ 180 |     min-height: 44px;
+ 181 | 
+ 182 |     padding: 0;
+ 183 |     overflow: hidden;
+ 184 |     resize: none;
+ 185 | 
+ 186 |     background-color: inherit;
+ 187 |     border: none;
+ 188 |     outline: none;
+ 189 |     font-size: 16px;
+ 190 |     line-height: 1.5;
+ 191 | }
+ 192 | 
+ 193 | .icon-button {
+ 194 |     display: inline-flex;
+ 195 |     align-items: center;
+ 196 |     justify-content: center;
+ 197 | 
+ 198 |     width: 28px;
+ 199 |     height: 28px;
+ 200 |     padding: 2px;
+ 201 | 
+ 202 |     cursor: pointer;
+ 203 |     background: transparent;
+ 204 |     border-radius: 6px;
+ 205 | }
+ 206 | 
+ 207 | .icon-button:hover {
+ 208 |     background: rgba(0, 0, 0, 0.08);
+ 209 | }
+ 210 | 
+ 211 | .icon-button:disabled {
+ 212 |     cursor: wait;
+ 213 |     opacity: 0.5;
+ 214 | }
+ 215 | 
+ 216 | #controls {
+ 217 |     position: fixed;
+ 218 |     top: 50%;
+ 219 |     left: 1em;
+ 220 |     z-index: 10000;
+ 221 | 
+ 222 |     display: flex;
+ 223 |     flex-direction: column;
+ 224 |     align-items: center;
+ 225 |     gap: 1em;
+ 226 | 
+ 227 |     padding: 1em;
+ 228 |     transform: translateY(-50%);
+ 229 | 
+ 230 |     background-color: #35363e;
+ 231 |     border-radius: 40px;
+ 232 | 
+ 233 |     box-shadow:
+ 234 |         0 1px 1px hsl(0deg 0% 0% / 0.075),
+ 235 |         0 2px 2px hsl(0deg 0% 0% / 0.075),
+ 236 |         0 4px 4px hsl(0deg 0% 0% / 0.075),
+ 237 |         0 8px 8px hsl(0deg 0% 0% / 0.075),
+ 238 |         0 16px 16px hsl(0deg 0% 0% / 0.075);
+ 239 | }
+ 240 | 
+ 241 | #add-btn,
+ 242 | .color {
+ 243 |     flex: 0 0 auto;
+ 244 |     width: 40px;
+ 245 |     height: 40px;
+ 246 |     padding: 0;
+ 247 | 
+ 248 |     cursor: pointer;
+ 249 |     border-radius: 50%;
+ 250 |     transition:
+ 251 |         transform 160ms ease,
+ 252 |         opacity 160ms ease;
+ 253 | }
+ 254 | 
+ 255 | #add-btn {
+ 256 |     display: flex;
+ 257 |     align-items: center;
+ 258 |     justify-content: center;
+ 259 |     background-color: rgb(107, 107, 107);
+ 260 | }
+ 261 | 
+ 262 | #add-btn:hover,
+ 263 | .color:hover {
+ 264 |     transform: scale(1.12);
+ 265 | }
+ 266 | 
+ 267 | #add-btn:disabled,
+ 268 | .color:disabled {
+ 269 |     cursor: wait;
+ 270 |     opacity: 0.55;
+ 271 |     transform: none;
+ 272 | }
+ 273 | 
+ 274 | .standard-page,
+ 275 | .page-state {
+ 276 |     display: grid;
+ 277 |     min-height: 100vh;
+ 278 |     place-items: center;
+ 279 |     padding: 24px;
+ 280 | 
+ 281 |     background:
+ 282 |         linear-gradient(
+ 283 |             135deg,
+ 284 |             #f8fafc,
+ 285 |             #eef1f5
+ 286 |         );
+ 287 | }
+ 288 | 
+ 289 | .page-state {
+ 290 |     align-content: center;
+ 291 |     gap: 12px;
+ 292 |     text-align: center;
+ 293 | }
+ 294 | 
+ 295 | .page-card {
+ 296 |     width: min(100%, 560px);
+ 297 |     padding: 42px;
+ 298 | 
+ 299 |     background: #ffffff;
+ 300 |     border: 1px solid #e1e4e8;
+ 301 |     border-radius: 18px;
+ 302 | 
+ 303 |     box-shadow:
+ 304 |         0 24px 60px rgba(31, 41, 55, 0.1);
+ 305 | }
+ 306 | 
+ 307 | .page-eyebrow {
+ 308 |     margin: 0 0 8px;
+ 309 |     color: #646a73;
+ 310 | 
+ 311 |     font-size: 13px;
+ 312 |     font-weight: 700;
+ 313 |     letter-spacing: 0.12em;
+ 314 |     text-transform: uppercase;
+ 315 | }
+ 316 | 
+ 317 | .page-card h1,
+ 318 | .page-state h1 {
+ 319 |     margin: 0 0 14px;
+ 320 |     font-size: clamp(32px, 6vw, 50px);
+ 321 |     line-height: 1;
+ 322 | }
+ 323 | 
+ 324 | .page-card p,
+ 325 | .page-state p {
+ 326 |     color: #5c626c;
+ 327 |     line-height: 1.65;
+ 328 | }
+ 329 | 
+ 330 | .page-actions {
+ 331 |     display: flex;
+ 332 |     flex-wrap: wrap;
+ 333 |     gap: 10px;
+ 334 |     margin-top: 28px;
+ 335 | }
+ 336 | 
+ 337 | .primary-link,
+ 338 | .secondary-link,
+ 339 | .primary-button {
+ 340 |     display: inline-flex;
+ 341 |     align-items: center;
+ 342 |     justify-content: center;
+ 343 | 
+ 344 |     min-height: 42px;
+ 345 |     padding: 0 16px;
+ 346 | 
+ 347 |     cursor: pointer;
+ 348 |     border-radius: 9px;
+ 349 |     font-weight: 650;
+ 350 |     text-decoration: none;
+ 351 | }
+ 352 | 
+ 353 | .primary-link,
+ 354 | .primary-button {
+ 355 |     color: #ffffff;
+ 356 |     background: #202228;
+ 357 | }
+ 358 | 
+ 359 | .secondary-link {
+ 360 |     color: #202228;
+ 361 |     background: #eceef1;
+ 362 | }
+ 363 | 
+ 364 | .primary-link:hover,
+ 365 | .primary-button:hover {
+ 366 |     background: #343740;
+ 367 | }
+ 368 | 
+ 369 | .secondary-link:hover {
+ 370 |     background: #dfe2e7;
+ 371 | }
+ 372 | 
+ 373 | @media (max-width: 600px) {
+ 374 |     .card {
+ 375 |         width: 320px;
+ 376 |     }
+ 377 | 
+ 378 |     .page-card {
+ 379 |         padding: 28px;
+ 380 |     }
+ 381 | 
+ 382 |     .board-navigation {
+ 383 |         top: 10px;
+ 384 |         right: 10px;
+ 385 |     }
+ 386 | }
+ 387 | /* Authentication and account pages */
+ 388 | 
+ 389 | .auth-card {
+ 390 |     width: min(100%, 480px);
+ 391 | }
+ 392 | 
+ 393 | .auth-form {
+ 394 |     display: grid;
+ 395 |     gap: 18px;
+ 396 |     margin-top: 28px;
+ 397 | }
+ 398 | 
+ 399 | .form-field {
+ 400 |     display: grid;
+ 401 |     gap: 7px;
+ 402 | }
+ 403 | 
+ 404 | .form-field span {
+ 405 |     color: #30343b;
+ 406 |     font-size: 14px;
+ 407 |     font-weight: 700;
+ 408 | }
+ 409 | 
+ 410 | .form-field input {
+ 411 |     width: 100%;
+ 412 |     min-height: 46px;
+ 413 |     padding: 0 13px;
+ 414 | 
+ 415 |     color: #18181a;
+ 416 |     background: #ffffff;
+ 417 |     border: 1px solid #cfd4dc;
+ 418 |     border-radius: 9px;
+ 419 |     outline: none;
+ 420 | }
+ 421 | 
+ 422 | .form-field input:focus {
+ 423 |     border-color: #595f69;
+ 424 |     box-shadow: 0 0 0 3px rgba(32, 34, 40, 0.1);
+ 425 | }
+ 426 | 
+ 427 | .form-field small {
+ 428 |     color: #707680;
+ 429 |     font-size: 12px;
+ 430 | }
+ 431 | 
+ 432 | .auth-submit {
+ 433 |     width: 100%;
+ 434 |     margin-top: 4px;
+ 435 | }
+ 436 | 
+ 437 | .primary-button:disabled,
+ 438 | .auth-switch button:disabled {
+ 439 |     cursor: wait;
+ 440 |     opacity: 0.58;
+ 441 | }
+ 442 | 
+ 443 | .auth-error {
+ 444 |     padding: 12px 14px;
+ 445 | 
+ 446 |     color: #8b1e2d;
+ 447 |     background: #fff0f2;
+ 448 |     border: 1px solid #f2c4cb;
+ 449 |     border-radius: 9px;
+ 450 | 
+ 451 |     font-size: 14px;
+ 452 |     line-height: 1.5;
+ 453 | }
+ 454 | 
+ 455 | .auth-switch {
+ 456 |     margin: 22px 0 0;
+ 457 |     text-align: center;
+ 458 | }
+ 459 | 
+ 460 | .auth-switch button {
+ 461 |     padding: 3px 5px;
+ 462 |     cursor: pointer;
+ 463 | 
+ 464 |     color: #202228;
+ 465 |     background: transparent;
+ 466 | 
+ 467 |     font-weight: 750;
+ 468 |     text-decoration: underline;
+ 469 |     text-underline-offset: 3px;
+ 470 | }
+ 471 | 
+ 472 | .account-details {
+ 473 |     display: grid;
+ 474 |     gap: 0;
+ 475 |     margin: 28px 0 0;
+ 476 | 
+ 477 |     border: 1px solid #e1e4e8;
+ 478 |     border-radius: 12px;
+ 479 | }
+ 480 | 
+ 481 | .account-details div {
+ 482 |     display: grid;
+ 483 |     grid-template-columns: 120px minmax(0, 1fr);
+ 484 |     gap: 18px;
+ 485 |     padding: 15px 17px;
+ 486 | }
+ 487 | 
+ 488 | .account-details div + div {
+ 489 |     border-top: 1px solid #e1e4e8;
+ 490 | }
+ 491 | 
+ 492 | .account-details dt {
+ 493 |     color: #646a73;
+ 494 |     font-size: 13px;
+ 495 |     font-weight: 750;
+ 496 | }
+ 497 | 
+ 498 | .account-details dd {
+ 499 |     min-width: 0;
+ 500 |     margin: 0;
+ 501 |     overflow-wrap: anywhere;
+ 502 | }
+ 503 | 
+ 504 | .account-id {
+ 505 |     font-family:
+ 506 |         "SFMono-Regular",
+ 507 |         Consolas,
+ 508 |         "Liberation Mono",
+ 509 |         monospace;
+ 510 |     font-size: 13px;
+ 511 | }
+ 512 | 
+ 513 | @media (max-width: 600px) {
+ 514 |     .account-details div {
+ 515 |         grid-template-columns: 1fr;
+ 516 |         gap: 5px;
+ 517 |     }
+ 518 | }
+
+========================================================================================
+FILE: src/services/notesService.js
+========================================================================================
+   1 | ﻿import {
+   2 |     Permission,
+   3 |     Role,
+   4 | } from "appwrite";
+   5 | 
+   6 | import { db } from "../appwrite/databases";
+   7 | 
+   8 | const getPrivateNotePermissions = (userId) => [
+   9 |     Permission.read(Role.user(userId)),
+  10 |     Permission.update(Role.user(userId)),
+  11 |     Permission.delete(Role.user(userId)),
+  12 | ];
+  13 | 
+  14 | export const notesService = {
+  15 |     async list() {
+  16 |         const response = await db.notes.list();
+  17 |         return response.documents;
+  18 |     },
+  19 | 
+  20 |     async create(payload, userId) {
+  21 |         if (!userId) {
+  22 |             throw new Error(
+  23 |                 "A signed-in user is required to create a note."
+  24 |             );
+  25 |         }
+  26 | 
+  27 |         return db.notes.create(
+  28 |             payload,
+  29 |             undefined,
+  30 |             getPrivateNotePermissions(userId)
+  31 |         );
+  32 |     },
+  33 | 
+  34 |     async update(id, payload) {
+  35 |         return db.notes.update(id, payload);
+  36 |     },
+  37 | 
+  38 |     async remove(id) {
+  39 |         return db.notes.delete(id);
+  40 |     },
+  41 | };
+
+========================================================================================
+FILE: src/utils.js
+========================================================================================
+   1 | export const setNewOffset = (
+   2 |     card,
+   3 |     mouseMovement = { x: 0, y: 0 }
+   4 | ) => {
+   5 |     if (!card) {
+   6 |         return {
+   7 |             x: 0,
+   8 |             y: 0,
+   9 |         };
+  10 |     }
+  11 | 
+  12 |     const offsetLeft =
+  13 |         card.offsetLeft - mouseMovement.x;
+  14 | 
+  15 |     const offsetTop =
+  16 |         card.offsetTop - mouseMovement.y;
+  17 | 
+  18 |     return {
+  19 |         x: Math.max(0, offsetLeft),
+  20 |         y: Math.max(0, offsetTop),
+  21 |     };
+  22 | };
+  23 | 
+  24 | export function autoGrow(textAreaRef) {
+  25 |     const textArea = textAreaRef.current;
+  26 | 
+  27 |     if (!textArea) {
+  28 |         return;
+  29 |     }
+  30 | 
+  31 |     textArea.style.height = "auto";
+  32 |     textArea.style.height = `${textArea.scrollHeight}px`;
+  33 | }
+  34 | 
+  35 | export const setZIndex = (selectedCard) => {
+  36 |     if (!selectedCard) {
+  37 |         return;
+  38 |     }
+  39 | 
+  40 |     selectedCard.style.zIndex = "999";
+  41 | 
+  42 |     Array.from(
+  43 |         document.getElementsByClassName("card")
+  44 |     ).forEach((card) => {
+  45 |         if (card !== selectedCard) {
+  46 |             card.style.zIndex = "998";
+  47 |         }
+  48 |     });
+  49 | };
+  50 | 
+  51 | export function parseStoredJson(value, fallback) {
+  52 |     if (value === null || value === undefined) {
+  53 |         return fallback;
+  54 |     }
+  55 | 
+  56 |     if (typeof value !== "string") {
+  57 |         return value;
+  58 |     }
+  59 | 
+  60 |     try {
+  61 |         return JSON.parse(value);
+  62 |     } catch {
+  63 |         return fallback;
+  64 |     }
+  65 | }
+  66 | 
+  67 | export function bodyParser(value) {
+  68 |     if (value === null || value === undefined) {
+  69 |         return "";
+  70 |     }
+  71 | 
+  72 |     if (typeof value !== "string") {
+  73 |         return String(value);
+  74 |     }
+  75 | 
+  76 |     try {
+  77 |         const parsedValue = JSON.parse(value);
+  78 | 
+  79 |         return typeof parsedValue === "string"
+  80 |             ? parsedValue
+  81 |             : String(parsedValue ?? "");
+  82 |     } catch {
+  83 |         return value;
+  84 |     }
+  85 | }
