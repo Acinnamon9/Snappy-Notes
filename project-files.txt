@@ -1,180 +1,160 @@
 # Selected Project Files
 
 Root: S:/Snappy-Notes
-Generated: 2026-06-14 01:50:52
+Generated: 2026-06-14 02:00:06
 
 
 ========================================================================================
-FILE: appwrite.config.json
+FILE: src/components/DeadlineControl.jsx
 ========================================================================================
-   1 | {
-   2 |     "organizationId": "6745b3c0001cc038f26e",
-   3 |     "projectId": "6745b3cf0008eecd557a",
-   4 |     "projectName": "Notes-App",
-   5 |     "endpoint": "https://fra.cloud.appwrite.io/v1",
-   6 |     "settings": {
-   7 |         "services": {
-   8 |             "account": true,
-   9 |             "avatars": true,
-  10 |             "databases": true,
-  11 |             "locale": true,
-  12 |             "health": true,
-  13 |             "storage": true,
-  14 |             "teams": true,
-  15 |             "users": true,
-  16 |             "sites": true,
-  17 |             "functions": true,
-  18 |             "graphql": true,
-  19 |             "messaging": true
-  20 |         },
-  21 |         "protocols": {
-  22 |             "rest": true,
-  23 |             "graphql": true,
-  24 |             "websocket": true
-  25 |         },
-  26 |         "auth": {
-  27 |             "methods": {
-  28 |                 "jwt": true,
-  29 |                 "phone": true,
-  30 |                 "invites": true,
-  31 |                 "anonymous": true,
-  32 |                 "email-otp": true,
-  33 |                 "magic-url": true,
-  34 |                 "email-password": true
-  35 |             },
-  36 |             "security": {
-  37 |                 "duration": 31536000,
-  38 |                 "limit": 0,
-  39 |                 "sessionsLimit": 10,
-  40 |                 "passwordHistory": 0,
-  41 |                 "passwordDictionary": false,
-  42 |                 "personalDataCheck": false,
-  43 |                 "sessionAlerts": false,
-  44 |                 "mockNumbers": []
-  45 |             }
-  46 |         }
-  47 |     },
-  48 |     "tablesDB": [
-  49 |         {
-  50 |             "$id": "6745b4fa0017647a1c45",
-  51 |             "name": "dev",
-  52 |             "enabled": true
-  53 |         }
-  54 |     ],
-  55 |     "tables": [
-  56 |         {
-  57 |             "$id": "6745b5040010eff5395d",
-  58 |             "$permissions": [
-  59 |                 "create(\"users\")"
-  60 |             ],
-  61 |             "databaseId": "6745b4fa0017647a1c45",
-  62 |             "name": "notes",
-  63 |             "enabled": true,
-  64 |             "rowSecurity": true,
-  65 |             "columns": [
-  66 |                 {
-  67 |                     "key": "body",
-  68 |                     "type": "string",
-  69 |                     "required": false,
-  70 |                     "array": false,
-  71 |                     "size": 100,
-  72 |                     "default": null,
-  73 |                     "encrypt": false
-  74 |                 },
-  75 |                 {
-  76 |                     "key": "colors",
-  77 |                     "type": "string",
-  78 |                     "required": true,
-  79 |                     "array": false,
-  80 |                     "size": 150,
-  81 |                     "default": null,
-  82 |                     "encrypt": false
-  83 |                 },
-  84 |                 {
-  85 |                     "key": "position",
-  86 |                     "type": "string",
-  87 |                     "required": true,
-  88 |                     "array": false,
-  89 |                     "size": 20,
-  90 |                     "default": null,
-  91 |                     "encrypt": false
-  92 |                 },
-  93 |                 {
-  94 |                     "key": "dueAt",
-  95 |                     "type": "datetime",
-  96 |                     "required": false,
-  97 |                     "array": false,
-  98 |                     "default": null,
-  99 |                     "format": ""
- 100 |                 },
- 101 |                 {
- 102 |                     "key": "completed",
- 103 |                     "type": "boolean",
- 104 |                     "required": false,
- 105 |                     "array": false,
- 106 |                     "default": false
- 107 |                 }
- 108 |             ],
- 109 |             "indexes": []
- 110 |         }
- 111 |     ]
- 112 | }
-
-========================================================================================
-FILE: src/components/AddButton.jsx
-========================================================================================
-   1 | import { useRef, useState } from "react";
-   2 | 
-   3 | import Plus from "../icons/Plus";
-   4 | import colors from "../assets/colors.json";
-   5 | import { useNotes } from "../context/notesContext";
+   1 | import PropTypes from "prop-types";
+   2 | import {
+   3 |     useEffect,
+   4 |     useState,
+   5 | } from "react";
    6 | 
-   7 | const AddButton = () => {
-   8 |     const { createNote } = useNotes();
-   9 |     const startingPosition = useRef(10);
-  10 |     const [creating, setCreating] = useState(false);
-  11 | 
-  12 |     const addNote = async () => {
-  13 |         if (creating) {
-  14 |             return;
-  15 |         }
-  16 | 
-  17 |         const payload = {
-  18 |             body: JSON.stringify(""),
-  19 |             position: JSON.stringify({
-  20 |                 x: startingPosition.current,
-  21 |                 y: startingPosition.current,
-  22 |             }),
-  23 |             colors: JSON.stringify(colors[0]),
-  24 |         };
-  25 | 
-  26 |         setCreating(true);
-  27 | 
-  28 |         try {
-  29 |             await createNote(payload);
-  30 |             startingPosition.current += 10;
-  31 |         } catch (error) {
-  32 |             console.error("Failed to create note:", error);
-  33 |             alert("The note could not be created.");
-  34 |         } finally {
-  35 |             setCreating(false);
-  36 |         }
-  37 |     };
-  38 | 
-  39 |     return (
-  40 |         <button
-  41 |             id="add-btn"
-  42 |             type="button"
-  43 |             aria-label="Add note"
-  44 |             disabled={creating}
-  45 |             onClick={addNote}
-  46 |         >
-  47 |             <Plus />
-  48 |         </button>
-  49 |     );
-  50 | };
-  51 | 
-  52 | export default AddButton;
+   7 | import { useNotes } from "../context/notesContext";
+   8 | import {
+   9 |     fromDateTimeLocalValue,
+  10 |     toDateTimeLocalValue,
+  11 | } from "../utils/dateTime";
+  12 | 
+  13 | const DeadlineControl = ({
+  14 |     noteId,
+  15 |     dueAt,
+  16 |     completed,
+  17 |     status,
+  18 | }) => {
+  19 |     const { updateNote } = useNotes();
+  20 | 
+  21 |     const [localDueAt, setLocalDueAt] = useState(
+  22 |         toDateTimeLocalValue(dueAt)
+  23 |     );
+  24 |     const [saving, setSaving] = useState(false);
+  25 |     const [errorMessage, setErrorMessage] = useState("");
+  26 | 
+  27 |     useEffect(() => {
+  28 |         setLocalDueAt(toDateTimeLocalValue(dueAt));
+  29 |     }, [dueAt]);
+  30 | 
+  31 |     const saveDeadline = async (nextLocalValue) => {
+  32 |         const previousValue = toDateTimeLocalValue(dueAt);
+  33 |         const nextDueAt = fromDateTimeLocalValue(nextLocalValue);
+  34 | 
+  35 |         if (nextLocalValue && !nextDueAt) {
+  36 |             setErrorMessage("Choose a valid date and time.");
+  37 |             return;
+  38 |         }
+  39 | 
+  40 |         setLocalDueAt(nextLocalValue);
+  41 |         setSaving(true);
+  42 |         setErrorMessage("");
+  43 | 
+  44 |         try {
+  45 |             await updateNote(noteId, {
+  46 |                 dueAt: nextDueAt,
+  47 |             });
+  48 |         } catch (error) {
+  49 |             console.error("Failed to update deadline:", error);
+  50 |             setLocalDueAt(previousValue);
+  51 |             setErrorMessage("Could not save the deadline.");
+  52 |         } finally {
+  53 |             setSaving(false);
+  54 |         }
+  55 |     };
+  56 | 
+  57 |     const toggleCompleted = async () => {
+  58 |         setSaving(true);
+  59 |         setErrorMessage("");
+  60 | 
+  61 |         try {
+  62 |             await updateNote(noteId, {
+  63 |                 completed: !completed,
+  64 |             });
+  65 |         } catch (error) {
+  66 |             console.error("Failed to update completion:", error);
+  67 |             setErrorMessage("Could not update the note.");
+  68 |         } finally {
+  69 |             setSaving(false);
+  70 |         }
+  71 |     };
+  72 | 
+  73 |     return (
+  74 |         <footer className="note-meta">
+  75 |             <div className="note-meta-row">
+  76 |                 <span
+  77 |                     className={[
+  78 |                         "deadline-status",
+  79 |                         `deadline-status--${status.kind}`,
+  80 |                     ].join(" ")}
+  81 |                     title={status.title}
+  82 |                     aria-live="polite"
+  83 |                 >
+  84 |                     {status.label}
+  85 |                 </span>
+  86 | 
+  87 |                 <button
+  88 |                     type="button"
+  89 |                     className="note-meta-button"
+  90 |                     disabled={saving}
+  91 |                     onClick={toggleCompleted}
+  92 |                 >
+  93 |                     {completed ? "Reopen" : "Complete"}
+  94 |                 </button>
+  95 |             </div>
+  96 | 
+  97 |             <div className="note-meta-row deadline-editor">
+  98 |                 <label className="deadline-picker">
+  99 |                     <span>Deadline</span>
+ 100 |                     <input
+ 101 |                         type="datetime-local"
+ 102 |                         value={localDueAt}
+ 103 |                         disabled={saving}
+ 104 |                         onChange={(event) => {
+ 105 |                             void saveDeadline(event.target.value);
+ 106 |                         }}
+ 107 |                     />
+ 108 |                 </label>
+ 109 | 
+ 110 |                 {dueAt && (
+ 111 |                     <button
+ 112 |                         type="button"
+ 113 |                         className="note-meta-button note-meta-button--quiet"
+ 114 |                         disabled={saving}
+ 115 |                         onClick={() => {
+ 116 |                             void saveDeadline("");
+ 117 |                         }}
+ 118 |                     >
+ 119 |                         Clear
+ 120 |                     </button>
+ 121 |                 )}
+ 122 |             </div>
+ 123 | 
+ 124 |             {errorMessage && (
+ 125 |                 <p className="note-meta-error" role="alert">
+ 126 |                     {errorMessage}
+ 127 |                 </p>
+ 128 |             )}
+ 129 |         </footer>
+ 130 |     );
+ 131 | };
+ 132 | 
+ 133 | DeadlineControl.propTypes = {
+ 134 |     noteId: PropTypes.string.isRequired,
+ 135 |     dueAt: PropTypes.string,
+ 136 |     completed: PropTypes.bool.isRequired,
+ 137 |     status: PropTypes.shape({
+ 138 |         kind: PropTypes.string.isRequired,
+ 139 |         label: PropTypes.string.isRequired,
+ 140 |         title: PropTypes.string.isRequired,
+ 141 |     }).isRequired,
+ 142 | };
+ 143 | 
+ 144 | DeadlineControl.defaultProps = {
+ 145 |     dueAt: null,
+ 146 | };
+ 147 | 
+ 148 | export default DeadlineControl;
 
 ========================================================================================
 FILE: src/components/NoteCard.jsx
@@ -186,442 +166,298 @@ FILE: src/components/NoteCard.jsx
    5 |     useState,
    6 | } from "react";
    7 | 
-   8 | import DeleteButton from "./DeleteButton";
-   9 | import Spinner from "../icons/Spinner";
-  10 | import {
-  11 |     autoGrow,
-  12 |     bodyParser,
-  13 |     parseStoredJson,
-  14 |     setNewOffset,
-  15 |     setZIndex,
-  16 | } from "../utils";
-  17 | import { useNotes } from "../context/notesContext";
-  18 | 
-  19 | const DEFAULT_POSITION = {
-  20 |     x: 10,
-  21 |     y: 10,
-  22 | };
-  23 | 
-  24 | const DEFAULT_COLORS = {
-  25 |     colorHeader: "#FFEFBE",
-  26 |     colorBody: "#FFF5DF",
-  27 |     colorText: "#18181A",
-  28 | };
-  29 | 
-  30 | const NoteCard = ({ note }) => {
-  31 |     const {
-  32 |         focusNoteId,
-  33 |         setSelectedNoteId,
-  34 |         clearFocusNote,
-  35 |         updateNote,
-  36 |     } = useNotes();
-  37 | 
-  38 |     const cardRef = useRef(null);
-  39 |     const textAreaRef = useRef(null);
-  40 |     const saveTimerRef = useRef(null);
-  41 |     const mouseStartPosition = useRef({
-  42 |         x: 0,
-  43 |         y: 0,
-  44 |     });
-  45 | 
-  46 |     const [saving, setSaving] = useState(false);
+   8 | import DeadlineControl from "./DeadlineControl";
+   9 | import DeleteButton from "./DeleteButton";
+  10 | import Spinner from "../icons/Spinner";
+  11 | import {
+  12 |     autoGrow,
+  13 |     bodyParser,
+  14 |     parseStoredJson,
+  15 |     setNewOffset,
+  16 |     setZIndex,
+  17 | } from "../utils";
+  18 | import { useNotes } from "../context/notesContext";
+  19 | import { useDeadlineStatus } from "../hooks/useDeadlineStatus";
+  20 | 
+  21 | const DEFAULT_POSITION = {
+  22 |     x: 10,
+  23 |     y: 10,
+  24 | };
+  25 | 
+  26 | const DEFAULT_COLORS = {
+  27 |     colorHeader: "#FFEFBE",
+  28 |     colorBody: "#FFF5DF",
+  29 |     colorText: "#18181A",
+  30 | };
+  31 | 
+  32 | const NoteCard = ({ note }) => {
+  33 |     const {
+  34 |         focusNoteId,
+  35 |         setSelectedNoteId,
+  36 |         clearFocusNote,
+  37 |         updateNote,
+  38 |     } = useNotes();
+  39 | 
+  40 |     const cardRef = useRef(null);
+  41 |     const textAreaRef = useRef(null);
+  42 |     const saveTimerRef = useRef(null);
+  43 |     const mouseStartPosition = useRef({
+  44 |         x: 0,
+  45 |         y: 0,
+  46 |     });
   47 | 
-  48 |     const [position, setPosition] = useState(() =>
-  49 |         parseStoredJson(note.position, DEFAULT_POSITION)
-  50 |     );
-  51 | 
-  52 |     const colors = parseStoredJson(
-  53 |         note.colors,
-  54 |         DEFAULT_COLORS
-  55 |     );
-  56 | 
-  57 |     const body = bodyParser(note.body);
-  58 | 
-  59 |     useEffect(() => {
-  60 |         autoGrow(textAreaRef);
-  61 |         setZIndex(cardRef.current);
-  62 | 
-  63 |         return () => {
-  64 |             if (saveTimerRef.current) {
-  65 |                 clearTimeout(saveTimerRef.current);
-  66 |             }
-  67 |         };
-  68 |     }, []);
-  69 | 
-  70 |     useEffect(() => {
-  71 |         if (focusNoteId !== note.$id) {
-  72 |             return;
-  73 |         }
-  74 | 
-  75 |         const textarea = textAreaRef.current;
-  76 | 
-  77 |         if (!textarea) {
-  78 |             return;
-  79 |         }
-  80 | 
-  81 |         textarea.focus();
-  82 | 
-  83 |         const caretPosition = textarea.value.length;
-  84 |         textarea.setSelectionRange(caretPosition, caretPosition);
-  85 | 
-  86 |         clearFocusNote(note.$id);
-  87 |     }, [clearFocusNote, focusNoteId, note.$id]);
-  88 | 
-  89 |     const saveData = async (key, value) => {
-  90 |         await updateNote(note.$id, {
-  91 |             [key]: JSON.stringify(value),
-  92 |         });
-  93 |     };
-  94 | 
-  95 |     const handleMouseMove = (event) => {
-  96 |         event.preventDefault();
-  97 | 
-  98 |         const mouseMovement = {
-  99 |             x: mouseStartPosition.current.x - event.clientX,
- 100 |             y: mouseStartPosition.current.y - event.clientY,
- 101 |         };
- 102 | 
- 103 |         mouseStartPosition.current = {
- 104 |             x: event.clientX,
- 105 |             y: event.clientY,
- 106 |         };
- 107 | 
- 108 |         const nextPosition = setNewOffset(
- 109 |             cardRef.current,
- 110 |             mouseMovement
- 111 |         );
- 112 | 
- 113 |         setPosition(nextPosition);
- 114 |     };
- 115 | 
- 116 |     const handleMouseUp = () => {
- 117 |         document.removeEventListener(
- 118 |             "mousemove",
- 119 |             handleMouseMove
- 120 |         );
- 121 | 
- 122 |         document.removeEventListener(
- 123 |             "mouseup",
- 124 |             handleMouseUp
- 125 |         );
- 126 | 
- 127 |         const nextPosition = setNewOffset(cardRef.current);
- 128 | 
- 129 |         void saveData("position", nextPosition).catch((error) => {
- 130 |             console.error("Failed to save note position:", error);
- 131 |         });
- 132 |     };
- 133 | 
- 134 |     const handleMouseDown = (event) => {
- 135 |         if (event.button !== 0) {
- 136 |             return;
- 137 |         }
- 138 | 
- 139 |         mouseStartPosition.current = {
- 140 |             x: event.clientX,
- 141 |             y: event.clientY,
- 142 |         };
- 143 | 
- 144 |         setSelectedNoteId(note.$id);
- 145 |         setZIndex(cardRef.current);
- 146 | 
- 147 |         document.addEventListener(
- 148 |             "mousemove",
- 149 |             handleMouseMove
- 150 |         );
- 151 | 
- 152 |         document.addEventListener(
- 153 |             "mouseup",
- 154 |             handleMouseUp
- 155 |         );
- 156 |     };
- 157 | 
- 158 |     const handleInput = () => {
- 159 |         autoGrow(textAreaRef);
- 160 |         setSaving(true);
- 161 | 
- 162 |         if (saveTimerRef.current) {
- 163 |             clearTimeout(saveTimerRef.current);
- 164 |         }
- 165 | 
- 166 |         saveTimerRef.current = setTimeout(
- 167 |             async () => {
- 168 |                 try {
- 169 |                     await saveData(
- 170 |                         "body",
- 171 |                         textAreaRef.current.value
- 172 |                     );
- 173 |                 } catch (error) {
- 174 |                     console.error(
- 175 |                         "Failed to save note body:",
- 176 |                         error
- 177 |                     );
- 178 |                 } finally {
- 179 |                     setSaving(false);
- 180 |                 }
- 181 |             },
- 182 |             1200
- 183 |         );
- 184 |     };
- 185 | 
- 186 |     return (
- 187 |         <article
- 188 |             ref={cardRef}
- 189 |             className="card"
- 190 |             style={{
- 191 |                 left: `${position.x}px`,
- 192 |                 top: `${position.y}px`,
- 193 |                 backgroundColor: colors.colorBody,
- 194 |             }}
- 195 |         >
- 196 |             <header
- 197 |                 className="card-header"
- 198 |                 onMouseDown={handleMouseDown}
- 199 |                 style={{
- 200 |                     backgroundColor: colors.colorHeader,
- 201 |                 }}
- 202 |             >
- 203 |                 <DeleteButton noteId={note.$id} />
- 204 | 
- 205 |                 {saving && (
- 206 |                     <div className="card-saving">
- 207 |                         <Spinner color={colors.colorText} />
- 208 |                         <span style={{ color: colors.colorText }}>
- 209 |                             Saving...
- 210 |                         </span>
- 211 |                     </div>
- 212 |                 )}
- 213 |             </header>
- 214 | 
- 215 |             <div className="card-body">
- 216 |                 <textarea
- 217 |                     ref={textAreaRef}
- 218 |                     defaultValue={body}
- 219 |                     aria-label="Note body"
- 220 |                     onFocus={() => {
- 221 |                         setZIndex(cardRef.current);
- 222 |                         setSelectedNoteId(note.$id);
- 223 |                     }}
- 224 |                     onInput={handleInput}
- 225 |                     style={{
- 226 |                         color: colors.colorText,
- 227 |                     }}
- 228 |                 />
- 229 |             </div>
- 230 |         </article>
- 231 |     );
- 232 | };
- 233 | 
- 234 | NoteCard.propTypes = {
- 235 |     note: PropTypes.shape({
- 236 |         $id: PropTypes.string.isRequired,
- 237 |         position: PropTypes.string,
- 238 |         colors: PropTypes.string,
- 239 |         body: PropTypes.string,
- 240 |     }).isRequired,
- 241 | };
- 242 | 
- 243 | export default NoteCard;
-
-========================================================================================
-FILE: src/components/NotesBoard.jsx
-========================================================================================
-   1 | import { Link } from "react-router-dom";
-   2 | 
-   3 | import Controls from "./Controls";
-   4 | import NoteCard from "./NoteCard";
-   5 | import { useNotes } from "../context/NotesContext";
-   6 | 
-   7 | const NotesBoard = () => {
-   8 |     const { notes } = useNotes();
-   9 | 
-  10 |     return (
-  11 |         <main className="notes-board">
-  12 |             <nav className="board-navigation">
-  13 |                 <Link to="/notes">Notes</Link>
-  14 |                 <Link to="/settings">Settings</Link>
-  15 |             </nav>
-  16 | 
-  17 |             {notes.length === 0 && (
-  18 |                 <div className="empty-board-message">
-  19 |                     <strong>No notes yet</strong>
-  20 |                     <span>Use the plus button to create one.</span>
-  21 |                 </div>
-  22 |             )}
-  23 | 
-  24 |             {notes.map((note) => (
-  25 |                 <NoteCard key={note.$id} note={note} />
-  26 |             ))}
-  27 | 
-  28 |             <Controls />
-  29 |         </main>
-  30 |     );
-  31 | };
-  32 | 
-  33 | export default NotesBoard;
-
-========================================================================================
-FILE: src/context/NotesProvider.jsx
-========================================================================================
-   1 | ﻿import PropTypes from "prop-types";
-   2 | import {
-   3 |     useCallback,
-   4 |     useEffect,
-   5 |     useMemo,
-   6 |     useState,
-   7 | } from "react";
-   8 | 
-   9 | import Spinner from "../icons/Spinner";
-  10 | import { notesService } from "../services/notesService";
-  11 | import { useAuth } from "./authContext";
-  12 | import { NotesContext } from "./notesContext";
-  13 | 
-  14 | const NotesProvider = ({ children }) => {
-  15 |     const { user } = useAuth();
-  16 | 
-  17 |     const [notes, setNotes] = useState([]);
-  18 |     const [selectedNoteId, setSelectedNoteId] = useState(null);
-  19 |     const [focusNoteId, setFocusNoteId] = useState(null);
-  20 |     const [loading, setLoading] = useState(true);
-  21 |     const [loadError, setLoadError] = useState(null);
-  22 | 
-  23 |     const loadNotes = useCallback(async () => {
-  24 |         setLoading(true);
-  25 |         setLoadError(null);
-  26 | 
-  27 |         try {
-  28 |             const loadedNotes = await notesService.list();
-  29 |             setNotes(loadedNotes);
-  30 |         } catch (error) {
-  31 |             console.error("Failed to load notes:", error);
-  32 |             setLoadError(error);
-  33 |         } finally {
-  34 |             setLoading(false);
-  35 |         }
-  36 |     }, []);
-  37 | 
-  38 |     useEffect(() => {
-  39 |         void loadNotes();
-  40 |     }, [loadNotes]);
-  41 | 
-  42 |     const createNote = useCallback(
-  43 |         async (payload) => {
-  44 |             const createdNote = await notesService.create(
-  45 |                 payload,
-  46 |                 user.$id
-  47 |             );
-  48 | 
-  49 |             setNotes((currentNotes) => [
-  50 |                 createdNote,
-  51 |                 ...currentNotes,
-  52 |             ]);
+  48 |     const [saving, setSaving] = useState(false);
+  49 | 
+  50 |     const [position, setPosition] = useState(() =>
+  51 |         parseStoredJson(note.position, DEFAULT_POSITION)
+  52 |     );
   53 | 
-  54 |             setSelectedNoteId(createdNote.$id);
-  55 |             setFocusNoteId(createdNote.$id);
-  56 | 
-  57 |             return createdNote;
-  58 |         },
-  59 |         [user]
-  60 |     );
-  61 | 
-  62 |     const updateNote = useCallback(async (id, payload) => {
-  63 |         const updatedNote = await notesService.update(id, payload);
-  64 | 
-  65 |         setNotes((currentNotes) =>
-  66 |             currentNotes.map((note) =>
-  67 |                 note.$id === id
-  68 |                     ? { ...note, ...updatedNote }
-  69 |                     : note
-  70 |             )
-  71 |         );
-  72 | 
-  73 |         return updatedNote;
-  74 |     }, []);
-  75 | 
-  76 |     const deleteNote = useCallback(async (id) => {
-  77 |         await notesService.remove(id);
-  78 | 
-  79 |         setNotes((currentNotes) =>
-  80 |             currentNotes.filter((note) => note.$id !== id)
-  81 |         );
-  82 | 
-  83 |         setSelectedNoteId((currentId) =>
-  84 |             currentId === id ? null : currentId
-  85 |         );
-  86 | 
-  87 |         setFocusNoteId((currentId) =>
-  88 |             currentId === id ? null : currentId
-  89 |         );
-  90 |     }, []);
-  91 | 
-  92 |     const clearFocusNote = useCallback((id) => {
-  93 |         setFocusNoteId((currentId) =>
-  94 |             currentId === id ? null : currentId
-  95 |         );
-  96 |     }, []);
-  97 | 
-  98 |     const contextValue = useMemo(
-  99 |         () => ({
- 100 |             notes,
- 101 |             selectedNoteId,
- 102 |             focusNoteId,
- 103 |             setSelectedNoteId,
- 104 |             clearFocusNote,
- 105 |             createNote,
- 106 |             updateNote,
- 107 |             deleteNote,
- 108 |             reloadNotes: loadNotes,
- 109 |         }),
- 110 |         [
- 111 |             notes,
- 112 |             selectedNoteId,
- 113 |             focusNoteId,
- 114 |             clearFocusNote,
- 115 |             createNote,
- 116 |             updateNote,
- 117 |             deleteNote,
- 118 |             loadNotes,
- 119 |         ]
- 120 |     );
- 121 | 
- 122 |     if (loading) {
- 123 |         return (
- 124 |             <div className="page-state">
- 125 |                 <Spinner size="64" />
- 126 |                 <p>Loading notes...</p>
- 127 |             </div>
- 128 |         );
- 129 |     }
- 130 | 
- 131 |     if (loadError) {
- 132 |         return (
- 133 |             <div className="page-state">
- 134 |                 <h1>Could not load notes</h1>
- 135 |                 <p>{loadError.message || "The notes request failed."}</p>
- 136 | 
- 137 |                 <button
- 138 |                     type="button"
- 139 |                     className="primary-button"
- 140 |                     onClick={loadNotes}
- 141 |                 >
- 142 |                     Try again
- 143 |                 </button>
- 144 |             </div>
- 145 |         );
- 146 |     }
- 147 | 
- 148 |     return (
- 149 |         <NotesContext.Provider value={contextValue}>
- 150 |             {children}
- 151 |         </NotesContext.Provider>
- 152 |     );
- 153 | };
- 154 | 
- 155 | NotesProvider.propTypes = {
- 156 |     children: PropTypes.node.isRequired,
- 157 | };
+  54 |     const colors = parseStoredJson(
+  55 |         note.colors,
+  56 |         DEFAULT_COLORS
+  57 |     );
+  58 | 
+  59 |     const body = bodyParser(note.body);
+  60 |     const completed = Boolean(note.completed);
+  61 |     const deadlineStatus = useDeadlineStatus(
+  62 |         note.dueAt,
+  63 |         completed
+  64 |     );
+  65 | 
+  66 |     useEffect(() => {
+  67 |         autoGrow(textAreaRef);
+  68 |         setZIndex(cardRef.current);
+  69 | 
+  70 |         return () => {
+  71 |             if (saveTimerRef.current) {
+  72 |                 clearTimeout(saveTimerRef.current);
+  73 |             }
+  74 |         };
+  75 |     }, []);
+  76 | 
+  77 |     useEffect(() => {
+  78 |         if (focusNoteId !== note.$id) {
+  79 |             return;
+  80 |         }
+  81 | 
+  82 |         const textarea = textAreaRef.current;
+  83 | 
+  84 |         if (!textarea) {
+  85 |             return;
+  86 |         }
+  87 | 
+  88 |         textarea.focus();
+  89 | 
+  90 |         const caretPosition = textarea.value.length;
+  91 |         textarea.setSelectionRange(caretPosition, caretPosition);
+  92 | 
+  93 |         clearFocusNote(note.$id);
+  94 |     }, [clearFocusNote, focusNoteId, note.$id]);
+  95 | 
+  96 |     const saveData = async (key, value) => {
+  97 |         await updateNote(note.$id, {
+  98 |             [key]: JSON.stringify(value),
+  99 |         });
+ 100 |     };
+ 101 | 
+ 102 |     const handleMouseMove = (event) => {
+ 103 |         event.preventDefault();
+ 104 | 
+ 105 |         const mouseMovement = {
+ 106 |             x: mouseStartPosition.current.x - event.clientX,
+ 107 |             y: mouseStartPosition.current.y - event.clientY,
+ 108 |         };
+ 109 | 
+ 110 |         mouseStartPosition.current = {
+ 111 |             x: event.clientX,
+ 112 |             y: event.clientY,
+ 113 |         };
+ 114 | 
+ 115 |         const nextPosition = setNewOffset(
+ 116 |             cardRef.current,
+ 117 |             mouseMovement
+ 118 |         );
+ 119 | 
+ 120 |         setPosition(nextPosition);
+ 121 |     };
+ 122 | 
+ 123 |     const handleMouseUp = () => {
+ 124 |         document.removeEventListener(
+ 125 |             "mousemove",
+ 126 |             handleMouseMove
+ 127 |         );
+ 128 | 
+ 129 |         document.removeEventListener(
+ 130 |             "mouseup",
+ 131 |             handleMouseUp
+ 132 |         );
+ 133 | 
+ 134 |         const nextPosition = setNewOffset(cardRef.current);
+ 135 | 
+ 136 |         void saveData("position", nextPosition).catch((error) => {
+ 137 |             console.error("Failed to save note position:", error);
+ 138 |         });
+ 139 |     };
+ 140 | 
+ 141 |     const handleMouseDown = (event) => {
+ 142 |         if (event.button !== 0) {
+ 143 |             return;
+ 144 |         }
+ 145 | 
+ 146 |         mouseStartPosition.current = {
+ 147 |             x: event.clientX,
+ 148 |             y: event.clientY,
+ 149 |         };
+ 150 | 
+ 151 |         setSelectedNoteId(note.$id);
+ 152 |         setZIndex(cardRef.current);
+ 153 | 
+ 154 |         document.addEventListener(
+ 155 |             "mousemove",
+ 156 |             handleMouseMove
+ 157 |         );
  158 | 
- 159 | export default NotesProvider;
+ 159 |         document.addEventListener(
+ 160 |             "mouseup",
+ 161 |             handleMouseUp
+ 162 |         );
+ 163 |     };
+ 164 | 
+ 165 |     const handleInput = () => {
+ 166 |         autoGrow(textAreaRef);
+ 167 |         setSaving(true);
+ 168 | 
+ 169 |         if (saveTimerRef.current) {
+ 170 |             clearTimeout(saveTimerRef.current);
+ 171 |         }
+ 172 | 
+ 173 |         saveTimerRef.current = setTimeout(
+ 174 |             async () => {
+ 175 |                 try {
+ 176 |                     await saveData(
+ 177 |                         "body",
+ 178 |                         textAreaRef.current.value
+ 179 |                     );
+ 180 |                 } catch (error) {
+ 181 |                     console.error(
+ 182 |                         "Failed to save note body:",
+ 183 |                         error
+ 184 |                     );
+ 185 |                 } finally {
+ 186 |                     setSaving(false);
+ 187 |                 }
+ 188 |             },
+ 189 |             1200
+ 190 |         );
+ 191 |     };
+ 192 | 
+ 193 |     return (
+ 194 |         <article
+ 195 |             ref={cardRef}
+ 196 |             className={[
+ 197 |                 "card",
+ 198 |                 `card--${deadlineStatus.kind}`,
+ 199 |             ].join(" ")}
+ 200 |             style={{
+ 201 |                 left: `${position.x}px`,
+ 202 |                 top: `${position.y}px`,
+ 203 |                 backgroundColor: colors.colorBody,
+ 204 |             }}
+ 205 |         >
+ 206 |             <header
+ 207 |                 className="card-header"
+ 208 |                 onMouseDown={handleMouseDown}
+ 209 |                 style={{
+ 210 |                     backgroundColor: colors.colorHeader,
+ 211 |                 }}
+ 212 |             >
+ 213 |                 <DeleteButton noteId={note.$id} />
+ 214 | 
+ 215 |                 {saving && (
+ 216 |                     <div className="card-saving">
+ 217 |                         <Spinner color={colors.colorText} />
+ 218 |                         <span style={{ color: colors.colorText }}>
+ 219 |                             Saving...
+ 220 |                         </span>
+ 221 |                     </div>
+ 222 |                 )}
+ 223 |             </header>
+ 224 | 
+ 225 |             <div className="card-body">
+ 226 |                 <textarea
+ 227 |                     ref={textAreaRef}
+ 228 |                     defaultValue={body}
+ 229 |                     aria-label="Note body"
+ 230 |                     readOnly={completed}
+ 231 |                     onFocus={() => {
+ 232 |                         setZIndex(cardRef.current);
+ 233 |                         setSelectedNoteId(note.$id);
+ 234 |                     }}
+ 235 |                     onInput={handleInput}
+ 236 |                     style={{
+ 237 |                         color: colors.colorText,
+ 238 |                     }}
+ 239 |                 />
+ 240 | 
+ 241 |                 <DeadlineControl
+ 242 |                     noteId={note.$id}
+ 243 |                     dueAt={note.dueAt}
+ 244 |                     completed={completed}
+ 245 |                     status={deadlineStatus}
+ 246 |                 />
+ 247 |             </div>
+ 248 |         </article>
+ 249 |     );
+ 250 | };
+ 251 | 
+ 252 | NoteCard.propTypes = {
+ 253 |     note: PropTypes.shape({
+ 254 |         $id: PropTypes.string.isRequired,
+ 255 |         position: PropTypes.string,
+ 256 |         colors: PropTypes.string,
+ 257 |         body: PropTypes.string,
+ 258 |         dueAt: PropTypes.string,
+ 259 |         completed: PropTypes.bool,
+ 260 |     }).isRequired,
+ 261 | };
+ 262 | 
+ 263 | export default NoteCard;
+
+========================================================================================
+FILE: src/hooks/useDeadlineStatus.js
+========================================================================================
+   1 | import {
+   2 |     useEffect,
+   3 |     useMemo,
+   4 |     useState,
+   5 | } from "react";
+   6 | 
+   7 | import { getDeadlineStatus } from "../utils/dateTime";
+   8 | 
+   9 | export function useDeadlineStatus(dueAt, completed) {
+  10 |     const [now, setNow] = useState(Date.now);
+  11 | 
+  12 |     useEffect(() => {
+  13 |         setNow(Date.now());
+  14 | 
+  15 |         if (!dueAt || completed) {
+  16 |             return undefined;
+  17 |         }
+  18 | 
+  19 |         const intervalId = window.setInterval(() => {
+  20 |             setNow(Date.now());
+  21 |         }, 1000);
+  22 | 
+  23 |         return () => {
+  24 |             window.clearInterval(intervalId);
+  25 |         };
+  26 |     }, [completed, dueAt]);
+  27 | 
+  28 |     return useMemo(
+  29 |         () => getDeadlineStatus(dueAt, completed, now),
+  30 |         [completed, dueAt, now]
+  31 |     );
+  32 | }
 
 ========================================================================================
 FILE: src/index.css
@@ -1144,137 +980,321 @@ FILE: src/index.css
  516 |         gap: 5px;
  517 |     }
  518 | }
+ 519 | 
+ 520 | /* Note deadlines and completion */
+ 521 | 
+ 522 | .card {
+ 523 |     border: 2px solid transparent;
+ 524 |     transition:
+ 525 |         border-color 180ms ease,
+ 526 |         box-shadow 180ms ease,
+ 527 |         opacity 180ms ease,
+ 528 |         filter 180ms ease;
+ 529 | }
+ 530 | 
+ 531 | .card--due-soon {
+ 532 |     border-color: rgba(217, 119, 6, 0.72);
+ 533 | }
+ 534 | 
+ 535 | .card--overdue {
+ 536 |     border-color: rgba(190, 24, 93, 0.8);
+ 537 |     box-shadow:
+ 538 |         0 0 0 3px rgba(190, 24, 93, 0.12),
+ 539 |         0 16px 32px rgba(0, 0, 0, 0.2);
+ 540 | }
+ 541 | 
+ 542 | .card--completed {
+ 543 |     opacity: 0.72;
+ 544 |     filter: saturate(0.72);
+ 545 | }
+ 546 | 
+ 547 | .card--completed .card-body textarea {
+ 548 |     text-decoration: line-through;
+ 549 |     opacity: 0.7;
+ 550 | }
+ 551 | 
+ 552 | .note-meta {
+ 553 |     display: grid;
+ 554 |     gap: 9px;
+ 555 |     margin-top: 14px;
+ 556 |     padding-top: 12px;
+ 557 |     border-top: 1px solid rgba(24, 24, 26, 0.14);
+ 558 | }
+ 559 | 
+ 560 | .note-meta-row {
+ 561 |     display: flex;
+ 562 |     align-items: center;
+ 563 |     justify-content: space-between;
+ 564 |     gap: 8px;
+ 565 | }
+ 566 | 
+ 567 | .deadline-status {
+ 568 |     display: inline-flex;
+ 569 |     align-items: center;
+ 570 |     min-height: 26px;
+ 571 |     padding: 4px 9px;
+ 572 | 
+ 573 |     background: rgba(24, 24, 26, 0.08);
+ 574 |     border-radius: 999px;
+ 575 | 
+ 576 |     font-size: 12px;
+ 577 |     font-weight: 750;
+ 578 |     line-height: 1.2;
+ 579 | }
+ 580 | 
+ 581 | .deadline-status--upcoming {
+ 582 |     color: #334155;
+ 583 |     background: rgba(51, 65, 85, 0.11);
+ 584 | }
+ 585 | 
+ 586 | .deadline-status--due-soon {
+ 587 |     color: #92400e;
+ 588 |     background: rgba(245, 158, 11, 0.2);
+ 589 | }
+ 590 | 
+ 591 | .deadline-status--overdue {
+ 592 |     color: #9f1239;
+ 593 |     background: rgba(225, 29, 72, 0.17);
+ 594 | }
+ 595 | 
+ 596 | .deadline-status--completed {
+ 597 |     color: #166534;
+ 598 |     background: rgba(34, 197, 94, 0.18);
+ 599 | }
+ 600 | 
+ 601 | .deadline-editor {
+ 602 |     align-items: end;
+ 603 | }
+ 604 | 
+ 605 | .deadline-picker {
+ 606 |     display: grid;
+ 607 |     flex: 1;
+ 608 |     gap: 4px;
+ 609 |     min-width: 0;
+ 610 | }
+ 611 | 
+ 612 | .deadline-picker span {
+ 613 |     color: rgba(24, 24, 26, 0.72);
+ 614 |     font-size: 11px;
+ 615 |     font-weight: 750;
+ 616 |     letter-spacing: 0.04em;
+ 617 |     text-transform: uppercase;
+ 618 | }
+ 619 | 
+ 620 | .deadline-picker input {
+ 621 |     width: 100%;
+ 622 |     min-width: 0;
+ 623 |     height: 34px;
+ 624 |     padding: 0 8px;
+ 625 | 
+ 626 |     color: #18181a;
+ 627 |     background: rgba(255, 255, 255, 0.55);
+ 628 |     border: 1px solid rgba(24, 24, 26, 0.2);
+ 629 |     border-radius: 7px;
+ 630 |     outline: none;
+ 631 | 
+ 632 |     font-size: 12px;
+ 633 | }
+ 634 | 
+ 635 | .deadline-picker input:focus {
+ 636 |     border-color: rgba(24, 24, 26, 0.58);
+ 637 |     box-shadow: 0 0 0 2px rgba(24, 24, 26, 0.1);
+ 638 | }
+ 639 | 
+ 640 | .note-meta-button {
+ 641 |     min-height: 30px;
+ 642 |     padding: 0 10px;
+ 643 | 
+ 644 |     cursor: pointer;
+ 645 |     color: #f8fafc;
+ 646 |     background: rgba(24, 24, 26, 0.82);
+ 647 |     border-radius: 7px;
+ 648 | 
+ 649 |     font-size: 12px;
+ 650 |     font-weight: 750;
+ 651 | }
+ 652 | 
+ 653 | .note-meta-button:hover {
+ 654 |     background: rgba(24, 24, 26, 0.95);
+ 655 | }
+ 656 | 
+ 657 | .note-meta-button--quiet {
+ 658 |     color: #18181a;
+ 659 |     background: rgba(24, 24, 26, 0.1);
+ 660 | }
+ 661 | 
+ 662 | .note-meta-button--quiet:hover {
+ 663 |     background: rgba(24, 24, 26, 0.17);
+ 664 | }
+ 665 | 
+ 666 | .note-meta-button:disabled,
+ 667 | .deadline-picker input:disabled {
+ 668 |     cursor: wait;
+ 669 |     opacity: 0.55;
+ 670 | }
+ 671 | 
+ 672 | .note-meta-error {
+ 673 |     margin: 0;
+ 674 |     color: #9f1239;
+ 675 |     font-size: 12px;
+ 676 |     font-weight: 650;
+ 677 | }
+ 678 | 
+ 679 | @media (max-width: 600px) {
+ 680 |     .deadline-editor {
+ 681 |         align-items: stretch;
+ 682 |         flex-direction: column;
+ 683 |     }
+ 684 | 
+ 685 |     .note-meta-button--quiet {
+ 686 |         align-self: flex-start;
+ 687 |     }
+ 688 | }
 
 ========================================================================================
-FILE: src/services/notesService.js
+FILE: src/utils/dateTime.js
 ========================================================================================
-   1 | ﻿import {
-   2 |     Permission,
-   3 |     Role,
-   4 | } from "appwrite";
+   1 | const SECOND = 1000;
+   2 | const MINUTE = 60 * SECOND;
+   3 | const HOUR = 60 * MINUTE;
+   4 | const DAY = 24 * HOUR;
    5 | 
-   6 | import { db } from "../appwrite/databases";
+   6 | const pad = (value) => String(value).padStart(2, "0");
    7 | 
-   8 | const getPrivateNotePermissions = (userId) => [
-   9 |     Permission.read(Role.user(userId)),
-  10 |     Permission.update(Role.user(userId)),
-  11 |     Permission.delete(Role.user(userId)),
-  12 | ];
-  13 | 
-  14 | export const notesService = {
-  15 |     async list() {
-  16 |         const response = await db.notes.list();
-  17 |         return response.documents;
-  18 |     },
-  19 | 
-  20 |     async create(payload, userId) {
-  21 |         if (!userId) {
-  22 |             throw new Error(
-  23 |                 "A signed-in user is required to create a note."
-  24 |             );
-  25 |         }
-  26 | 
-  27 |         return db.notes.create(
-  28 |             payload,
-  29 |             undefined,
-  30 |             getPrivateNotePermissions(userId)
-  31 |         );
-  32 |     },
-  33 | 
-  34 |     async update(id, payload) {
-  35 |         return db.notes.update(id, payload);
-  36 |     },
-  37 | 
-  38 |     async remove(id) {
-  39 |         return db.notes.delete(id);
-  40 |     },
-  41 | };
-
-========================================================================================
-FILE: src/utils.js
-========================================================================================
-   1 | export const setNewOffset = (
-   2 |     card,
-   3 |     mouseMovement = { x: 0, y: 0 }
-   4 | ) => {
-   5 |     if (!card) {
-   6 |         return {
-   7 |             x: 0,
-   8 |             y: 0,
-   9 |         };
-  10 |     }
-  11 | 
-  12 |     const offsetLeft =
-  13 |         card.offsetLeft - mouseMovement.x;
+   8 | export function toDateTimeLocalValue(value) {
+   9 |     if (!value) {
+  10 |         return "";
+  11 |     }
+  12 | 
+  13 |     const date = new Date(value);
   14 | 
-  15 |     const offsetTop =
-  16 |         card.offsetTop - mouseMovement.y;
-  17 | 
-  18 |     return {
-  19 |         x: Math.max(0, offsetLeft),
-  20 |         y: Math.max(0, offsetTop),
-  21 |     };
-  22 | };
-  23 | 
-  24 | export function autoGrow(textAreaRef) {
-  25 |     const textArea = textAreaRef.current;
-  26 | 
-  27 |     if (!textArea) {
-  28 |         return;
-  29 |     }
-  30 | 
-  31 |     textArea.style.height = "auto";
-  32 |     textArea.style.height = `${textArea.scrollHeight}px`;
-  33 | }
-  34 | 
-  35 | export const setZIndex = (selectedCard) => {
-  36 |     if (!selectedCard) {
-  37 |         return;
-  38 |     }
-  39 | 
-  40 |     selectedCard.style.zIndex = "999";
-  41 | 
-  42 |     Array.from(
-  43 |         document.getElementsByClassName("card")
-  44 |     ).forEach((card) => {
-  45 |         if (card !== selectedCard) {
-  46 |             card.style.zIndex = "998";
-  47 |         }
-  48 |     });
-  49 | };
-  50 | 
-  51 | export function parseStoredJson(value, fallback) {
-  52 |     if (value === null || value === undefined) {
-  53 |         return fallback;
-  54 |     }
-  55 | 
-  56 |     if (typeof value !== "string") {
-  57 |         return value;
-  58 |     }
-  59 | 
-  60 |     try {
-  61 |         return JSON.parse(value);
-  62 |     } catch {
-  63 |         return fallback;
-  64 |     }
-  65 | }
+  15 |     if (Number.isNaN(date.getTime())) {
+  16 |         return "";
+  17 |     }
+  18 | 
+  19 |     return [
+  20 |         date.getFullYear(),
+  21 |         "-",
+  22 |         pad(date.getMonth() + 1),
+  23 |         "-",
+  24 |         pad(date.getDate()),
+  25 |         "T",
+  26 |         pad(date.getHours()),
+  27 |         ":",
+  28 |         pad(date.getMinutes()),
+  29 |     ].join("");
+  30 | }
+  31 | 
+  32 | export function fromDateTimeLocalValue(value) {
+  33 |     if (!value) {
+  34 |         return null;
+  35 |     }
+  36 | 
+  37 |     const date = new Date(value);
+  38 | 
+  39 |     if (Number.isNaN(date.getTime())) {
+  40 |         return null;
+  41 |     }
+  42 | 
+  43 |     return date.toISOString();
+  44 | }
+  45 | 
+  46 | function formatDuration(milliseconds) {
+  47 |     const absoluteMilliseconds = Math.max(
+  48 |         0,
+  49 |         Math.abs(milliseconds)
+  50 |     );
+  51 | 
+  52 |     const days = Math.floor(absoluteMilliseconds / DAY);
+  53 |     const hours = Math.floor(
+  54 |         (absoluteMilliseconds % DAY) / HOUR
+  55 |     );
+  56 |     const minutes = Math.floor(
+  57 |         (absoluteMilliseconds % HOUR) / MINUTE
+  58 |     );
+  59 |     const seconds = Math.floor(
+  60 |         (absoluteMilliseconds % MINUTE) / SECOND
+  61 |     );
+  62 | 
+  63 |     if (days > 0) {
+  64 |         return `${days}d ${hours}h`;
+  65 |     }
   66 | 
-  67 | export function bodyParser(value) {
-  68 |     if (value === null || value === undefined) {
-  69 |         return "";
-  70 |     }
-  71 | 
-  72 |     if (typeof value !== "string") {
-  73 |         return String(value);
-  74 |     }
-  75 | 
-  76 |     try {
-  77 |         const parsedValue = JSON.parse(value);
-  78 | 
-  79 |         return typeof parsedValue === "string"
-  80 |             ? parsedValue
-  81 |             : String(parsedValue ?? "");
-  82 |     } catch {
-  83 |         return value;
-  84 |     }
-  85 | }
+  67 |     if (hours > 0) {
+  68 |         return `${hours}h ${minutes}m`;
+  69 |     }
+  70 | 
+  71 |     if (minutes > 0) {
+  72 |         return `${minutes}m ${seconds}s`;
+  73 |     }
+  74 | 
+  75 |     return `${seconds}s`;
+  76 | }
+  77 | 
+  78 | export function formatDeadlineTitle(value) {
+  79 |     if (!value) {
+  80 |         return "";
+  81 |     }
+  82 | 
+  83 |     const date = new Date(value);
+  84 | 
+  85 |     if (Number.isNaN(date.getTime())) {
+  86 |         return "Invalid deadline";
+  87 |     }
+  88 | 
+  89 |     return new Intl.DateTimeFormat(undefined, {
+  90 |         dateStyle: "medium",
+  91 |         timeStyle: "short",
+  92 |     }).format(date);
+  93 | }
+  94 | 
+  95 | export function getDeadlineStatus(
+  96 |     dueAt,
+  97 |     completed,
+  98 |     now = Date.now()
+  99 | ) {
+ 100 |     if (completed) {
+ 101 |         return {
+ 102 |             kind: "completed",
+ 103 |             label: "Completed",
+ 104 |             title: dueAt
+ 105 |                 ? `Completed · Due ${formatDeadlineTitle(dueAt)}`
+ 106 |                 : "Completed",
+ 107 |         };
+ 108 |     }
+ 109 | 
+ 110 |     if (!dueAt) {
+ 111 |         return {
+ 112 |             kind: "none",
+ 113 |             label: "No deadline",
+ 114 |             title: "No deadline set",
+ 115 |         };
+ 116 |     }
+ 117 | 
+ 118 |     const dueTime = new Date(dueAt).getTime();
+ 119 | 
+ 120 |     if (Number.isNaN(dueTime)) {
+ 121 |         return {
+ 122 |             kind: "none",
+ 123 |             label: "Invalid deadline",
+ 124 |             title: "The stored deadline is invalid",
+ 125 |         };
+ 126 |     }
+ 127 | 
+ 128 |     const remaining = dueTime - now;
+ 129 |     const title = `Due ${formatDeadlineTitle(dueAt)}`;
+ 130 | 
+ 131 |     if (remaining < 0) {
+ 132 |         return {
+ 133 |             kind: "overdue",
+ 134 |             label: `${formatDuration(remaining)} overdue`,
+ 135 |             title,
+ 136 |         };
+ 137 |     }
+ 138 | 
+ 139 |     return {
+ 140 |         kind: remaining <= DAY ? "due-soon" : "upcoming",
+ 141 |         label: `${formatDuration(remaining)} left`,
+ 142 |         title,
+ 143 |     };
+ 144 | }

@@ -516,3 +516,353 @@ a {
         gap: 5px;
     }
 }
+
+/* Note reminders and completion */
+
+.card {
+    overflow: visible;
+    border: 2px solid transparent;
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        opacity 180ms ease,
+        filter 180ms ease;
+}
+
+.card-header {
+    border-radius: 4px 4px 0 0;
+}
+
+.card-body {
+    border-radius: 0 0 4px 4px;
+}
+
+.card--due-soon {
+    border-color: rgba(217, 119, 6, 0.72);
+}
+
+.card--overdue {
+    border-color: rgba(190, 24, 93, 0.8);
+    box-shadow:
+        0 0 0 3px rgba(190, 24, 93, 0.12),
+        0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+.card--completed {
+    opacity: 0.72;
+    filter: saturate(0.72);
+}
+
+.card--completed .card-body textarea {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.card-header-actions,
+.note-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-header-actions {
+    min-width: 0;
+}
+
+.note-actions {
+    position: relative;
+}
+
+.deadline-status {
+    display: inline-flex;
+    align-items: center;
+    max-width: 126px;
+    min-height: 24px;
+    padding: 3px 8px;
+    overflow: hidden;
+
+    cursor: pointer;
+    color: #334155;
+    background: rgba(24, 24, 26, 0.08);
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deadline-status--upcoming {
+    color: #334155;
+    background: rgba(51, 65, 85, 0.11);
+}
+
+.deadline-status--due-soon {
+    color: #92400e;
+    background: rgba(245, 158, 11, 0.22);
+}
+
+.deadline-status--overdue {
+    color: #9f1239;
+    background: rgba(225, 29, 72, 0.18);
+}
+
+.deadline-status--completed {
+    color: #166534;
+    background: rgba(34, 197, 94, 0.2);
+}
+
+.note-action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 27px;
+    height: 27px;
+    padding: 0;
+
+    cursor: pointer;
+    color: rgba(24, 24, 26, 0.68);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 7px;
+}
+
+.note-action-icon:hover {
+    color: #18181a;
+    background: rgba(24, 24, 26, 0.09);
+}
+
+.note-action-icon--active {
+    color: #78350f;
+    background: rgba(245, 158, 11, 0.16);
+}
+
+.note-action-icon--completed {
+    color: #166534;
+    background: rgba(34, 197, 94, 0.18);
+}
+
+.note-action-icon:disabled,
+.deadline-status:disabled {
+    cursor: wait;
+    opacity: 0.52;
+}
+
+.deadline-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 20;
+
+    display: grid;
+    gap: 14px;
+    width: min(330px, calc(100vw - 40px));
+    padding: 15px;
+
+    color: #18181a;
+    background: #ffffff;
+    border: 1px solid #d8dce2;
+    border-radius: 12px;
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.22),
+        0 3px 10px rgba(0, 0, 0, 0.1);
+
+    cursor: default;
+    user-select: text;
+}
+
+.deadline-popover-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.deadline-popover-header > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.deadline-popover-header strong {
+    font-size: 15px;
+}
+
+.deadline-popover-header span {
+    overflow: hidden;
+    color: #69707a;
+    font-size: 11px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deadline-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 26px;
+    height: 26px;
+    padding: 0;
+
+    cursor: pointer;
+    color: #5d6470;
+    background: #f0f2f5;
+    border-radius: 7px;
+
+    font-size: 20px;
+    line-height: 1;
+}
+
+.deadline-close:hover {
+    color: #18181a;
+    background: #e4e7eb;
+}
+
+.deadline-section {
+    display: grid;
+    gap: 8px;
+}
+
+.deadline-section + .deadline-section {
+    padding-top: 13px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.deadline-section-label,
+.deadline-picker span {
+    color: #555d68;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.deadline-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.deadline-quick-grid button,
+.deadline-custom-timer button,
+.deadline-save,
+.deadline-popover-footer button {
+    min-height: 32px;
+    padding: 0 10px;
+
+    cursor: pointer;
+    color: #25282e;
+    background: #eef0f3;
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.deadline-quick-grid button:hover,
+.deadline-custom-timer button:hover,
+.deadline-popover-footer button:hover {
+    background: #e0e3e8;
+}
+
+.deadline-custom-timer {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    gap: 6px;
+}
+
+.deadline-custom-timer input,
+.deadline-custom-timer select,
+.deadline-picker input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 8px;
+
+    color: #18181a;
+    background: #ffffff;
+    border: 1px solid #ccd1d8;
+    border-radius: 7px;
+    outline: none;
+
+    font-size: 12px;
+}
+
+.deadline-custom-timer input:focus,
+.deadline-custom-timer select:focus,
+.deadline-picker input:focus {
+    border-color: #6a717c;
+    box-shadow: 0 0 0 2px rgba(24, 24, 26, 0.1);
+}
+
+.deadline-picker {
+    display: grid;
+    gap: 5px;
+}
+
+.deadline-save {
+    justify-self: start;
+    color: #ffffff;
+    background: #202228;
+}
+
+.deadline-save:hover {
+    background: #343740;
+}
+
+.deadline-popover-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 13px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.deadline-popover-footer .deadline-clear {
+    margin-left: auto;
+    color: #9f1239;
+    background: #fff0f2;
+}
+
+.deadline-popover-footer .deadline-clear:hover {
+    background: #ffe1e6;
+}
+
+.deadline-popover button:disabled,
+.deadline-popover input:disabled,
+.deadline-popover select:disabled {
+    cursor: wait;
+    opacity: 0.52;
+}
+
+.note-meta-error {
+    margin: 0;
+    color: #9f1239;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+@media (max-width: 600px) {
+    .deadline-status {
+        max-width: 94px;
+    }
+
+    .deadline-popover {
+        right: -4px;
+    }
+
+    .deadline-custom-timer {
+        grid-template-columns: 64px 1fr;
+    }
+
+    .deadline-custom-timer button {
+        grid-column: 1 / -1;
+    }
+}
+

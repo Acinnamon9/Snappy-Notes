@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import Controls from "./Controls";
 import NoteCard from "./NoteCard";
-import { useNotes } from "../context/NotesContext";
+import { useNotes } from "../context/notesContext";
 
 const NotesBoard = () => {
     const { notes } = useNotes();

@@ -5,6 +5,7 @@ import {
     useState,
 } from "react";
 
+import DeadlineControl from "./DeadlineControl";
 import DeleteButton from "./DeleteButton";
 import Spinner from "../icons/Spinner";
 import {
@@ -15,6 +16,7 @@ import {
     setZIndex,
 } from "../utils";
 import { useNotes } from "../context/notesContext";
+import { useDeadlineStatus } from "../hooks/useDeadlineStatus";
 
 const DEFAULT_POSITION = {
     x: 10,
@@ -55,6 +57,11 @@ const NoteCard = ({ note }) => {
     );
 
     const body = bodyParser(note.body);
+    const completed = Boolean(note.completed);
+    const deadlineStatus = useDeadlineStatus(
+        note.dueAt,
+        completed
+    );
 
     useEffect(() => {
         autoGrow(textAreaRef);
@@ -85,6 +92,11 @@ const NoteCard = ({ note }) => {
 
         clearFocusNote(note.$id);
     }, [clearFocusNote, focusNoteId, note.$id]);
+
+    const activateCard = () => {
+        setSelectedNoteId(note.$id);
+        setZIndex(cardRef.current);
+    };
 
     const saveData = async (key, value) => {
         await updateNote(note.$id, {
@@ -141,8 +153,7 @@ const NoteCard = ({ note }) => {
             y: event.clientY,
         };
 
-        setSelectedNoteId(note.$id);
-        setZIndex(cardRef.current);
+        activateCard();
 
         document.addEventListener(
             "mousemove",
@@ -186,7 +197,10 @@ const NoteCard = ({ note }) => {
     return (
         <article
             ref={cardRef}
-            className="card"
+            className={[
+                "card",
+                `card--${deadlineStatus.kind}`,
+            ].join(" ")}
             style={{
                 left: `${position.x}px`,
                 top: `${position.y}px`,
@@ -202,14 +216,24 @@ const NoteCard = ({ note }) => {
             >
                 <DeleteButton noteId={note.$id} />
 
-                {saving && (
-                    <div className="card-saving">
-                        <Spinner color={colors.colorText} />
-                        <span style={{ color: colors.colorText }}>
-                            Saving...
-                        </span>
-                    </div>
-                )}
+                <div className="card-header-actions">
+                    {saving && (
+                        <div className="card-saving">
+                            <Spinner color={colors.colorText} />
+                            <span style={{ color: colors.colorText }}>
+                                Saving...
+                            </span>
+                        </div>
+                    )}
+
+                    <DeadlineControl
+                        noteId={note.$id}
+                        dueAt={note.dueAt}
+                        completed={completed}
+                        status={deadlineStatus}
+                        onActivate={activateCard}
+                    />
+                </div>
             </header>
 
             <div className="card-body">
@@ -217,10 +241,8 @@ const NoteCard = ({ note }) => {
                     ref={textAreaRef}
                     defaultValue={body}
                     aria-label="Note body"
-                    onFocus={() => {
-                        setZIndex(cardRef.current);
-                        setSelectedNoteId(note.$id);
-                    }}
+                    readOnly={completed}
+                    onFocus={activateCard}
                     onInput={handleInput}
                     style={{
                         color: colors.colorText,
@@ -237,6 +259,8 @@ NoteCard.propTypes = {
         position: PropTypes.string,
         colors: PropTypes.string,
         body: PropTypes.string,
+        dueAt: PropTypes.string,
+        completed: PropTypes.bool,
     }).isRequired,
 };
 

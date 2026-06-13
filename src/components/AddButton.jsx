@@ -21,6 +21,7 @@ const AddButton = () => {
                 y: startingPosition.current,
             }),
             colors: JSON.stringify(colors[0]),
+            completed: false,
         };
 
         setCreating(true);
