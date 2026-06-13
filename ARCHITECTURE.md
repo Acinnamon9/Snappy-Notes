@@ -1,84 +1,48 @@
-# Architecture & Codebase Overview
+# Snappy Notes Architecture
 
-This document provides a technical deep-dive into the "Sticky Notes" application. It is designed to help new developers understand how the parts fit together.
+## Stack
 
-## 🛠 Tech Stack
+- React 18
+- Vite
+- React Router
+- Appwrite
+- Plain CSS
 
-- **Frontend**: React (Vite)
-- **Language**: JavaScript (ES6+)
-- **Backend / Database**: Appwrite (BaaS)
-- **Styling**: Plain CSS (with CSS Variables for theming)
+## Routes
 
-## 📂 Project Structure `src/`
+- `/` redirects to `/notes`
+- `/notes` renders the notes workspace
+- `/login` is reserved for authentication
+- `/settings` is reserved for settings
+- Unknown URLs render the not-found page
 
-```text
-src/
-├── appwrite/       # Backend configuration and service wrappers
-│   ├── config.js   # Env var imports and client setup
-│   └── databases.js# Database collection references (Notes)
-├── assets/         # Static assets (images, fonts)
-├── components/     # Reusable UI components
-│   ├── NoteCard.jsx    # Individual sticky note logic
-│   ├── Color.jsx       # Color picker component
-│   └── ...
-├── context/        # React Context for global state
-│   └── NotesContext.jsx # Manages notes list and loading state
-├── icons/          # SVG functional components
-├── pages/          # Full page layouts
-├── utils.js        # Helper functions (positioning, auto-grow)
-├── App.jsx         # Main router/wrapper
-└── main.jsx        # Entry point
-```
+## Responsibility boundaries
 
-## 🔑 Key Concepts
+### Router
 
-### 1. State Management (`NotesContext`)
+`src/app/router.jsx` defines application routes.
 
-We use React Context to share the state of notes across the application.
+### Pages
 
-- **File**: `src/context/NotesContext.jsx`
-- **Data**: `notes` (Array of objects), `selectedNote` (Currently active note).
-- **Initialization**: On load, `init()` calls `db.notes.list()` to fetch existing notes from Appwrite.
-- **Loading State**: Displays a `<Spinner />` while fetching data.
+Page components represent complete screens. Only the notes
+route mounts `NotesProvider`, so ordinary pages do not fetch notes.
 
-### 2. Backend Integration (Appwrite)
+### Notes context
 
-All backend logic is abstracted in `src/appwrite/databases.js`.
+`NotesContext.jsx` owns:
 
-- **Collections**: We target a specific Notes collection defined in `.env.local`.
-- **Operations**: Standard CRUD operations (List, Create, Update, Delete) are handled directly via the Appwrite SDK.
+- Loaded notes
+- Selected note ID
+- Initial loading state
+- Initial load errors
+- Create, update, and delete actions
 
-### 3. Note Mechanics (Drag & Drop)
+### Notes service
 
-The "sticky" behavior is calculated manually in `src/utils.js`.
+`notesService.js` is the boundary between React and Appwrite.
+UI components do not import the Appwrite database directly.
 
-- **`setNewOffset`**: Calculates the new (x, y) position of a note based on mouse movement.
-- **`setZIndex`**: brings the currently clicked note to the front (`z-index: 999`).
-- **Auto-Save**: Changes to text or position trigger updates to the backend. We often use debouncing (or saving on blur/mouse up) to avoid spamming the API.
+### Notes board
 
-## 📝 Data Model
-
-A typical **Note** document in Appwrite looks like this:
-
-```json
-{
-  "$id": "unique_string_id",
-  "body": "JSON string or simple text content",
-  "colors": "JSON stringify object {id, colorHeader, colorBody, text}",
-  "position": "JSON stringify object {x, y}"
-}
-```
-
-_Note: Some fields like `position` and `colors` are stored as stringified JSON to allow flexibility._
-
-## 🚀 Common Workflows
-
-### Setup
-
-Ensure you have `.env.local` populated with your Appwrite endpoint and IDs.
-
-### Adding a Feature
-
-1.  **UI**: Create component in `src/components`.
-2.  **Logic**: If it affects global state, update `NotesContext`.
-3.  **Persistance**: If data needs saving, add method to `src/appwrite/databases.js`.
+`NotesBoard.jsx` owns the board layout. The dark grid and scrolling
+belong to `.notes-board`, not to the root application element.

@@ -1,42 +1,47 @@
-import React from "react";
-import { useContext } from "react";
-import { NotesContext } from "../context/NotesContext";
-import { db } from "../appwrite/databases";
+import { useState } from "react";
+
+import { useNotes } from "../context/NotesContext";
 
 const Color = ({ color }) => {
-    const { selectedNote, notes, setNotes } = useContext(NotesContext);
+    const { selectedNoteId, updateNote } = useNotes();
+    const [updating, setUpdating] = useState(false);
 
-    const changeColor = () => {
-        console.log("Selected color:", selectedNote);
+    const changeColor = async () => {
+        if (!selectedNoteId) {
+            alert("Select a note before changing its colour.");
+            return;
+        }
+
+        if (updating) {
+            return;
+        }
+
+        setUpdating(true);
 
         try {
-            const currentNoteIndex = notes.findIndex(
-                (note) => note.$id === selectedNote.$id
-            );
-
-            const updatedNote = {
-                ...notes[currentNoteIndex],
-                colors: JSON.stringify(color),
-            };
-
-            const newNotes = [...notes];
-            newNotes[currentNoteIndex] = updatedNote;
-            setNotes(newNotes);
-
-            db.notes.update(selectedNote.$id, {
+            await updateNote(selectedNoteId, {
                 colors: JSON.stringify(color),
             });
         } catch (error) {
-            alert("You must select a note before changing colors");
+            console.error("Failed to update note colour:", error);
+            alert("The note colour could not be changed.");
+        } finally {
+            setUpdating(false);
         }
     };
 
     return (
-        <div
-            onClick={changeColor}
+        <button
+            type="button"
             className="color"
-            style={{ backgroundColor: color.colorHeader }}
-        ></div>
+            aria-label={`Use ${color.id}`}
+            title={color.id}
+            disabled={updating}
+            onClick={changeColor}
+            style={{
+                backgroundColor: color.colorHeader,
+            }}
+        />
     );
 };
 

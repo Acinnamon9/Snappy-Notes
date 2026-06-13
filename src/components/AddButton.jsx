@@ -1,34 +1,51 @@
-import React from "react";
+import { useRef, useState } from "react";
+
 import Plus from "../icons/Plus";
 import colors from "../assets/colors.json";
-import { useRef } from "react";
-import { db } from "../appwrite/databases";
-import { useContext } from "react";
-import { NotesContext } from "../context/NotesContext";
+import { useNotes } from "../context/NotesContext";
 
 const AddButton = () => {
-    const { setNotes } = useContext(NotesContext);
-    const startingPos = useRef(10);
+    const { createNote } = useNotes();
+    const startingPosition = useRef(10);
+    const [creating, setCreating] = useState(false);
 
     const addNote = async () => {
+        if (creating) {
+            return;
+        }
+
         const payload = {
+            body: JSON.stringify(""),
             position: JSON.stringify({
-                x: startingPos.current,
-                y: startingPos.current,
+                x: startingPosition.current,
+                y: startingPosition.current,
             }),
             colors: JSON.stringify(colors[0]),
         };
 
-        startingPos.current += 10;
+        setCreating(true);
 
-        const response = await db.notes.create(payload);
-        setNotes((prevState) => [response, ...prevState]);
+        try {
+            await createNote(payload);
+            startingPosition.current += 10;
+        } catch (error) {
+            console.error("Failed to create note:", error);
+            alert("The note could not be created.");
+        } finally {
+            setCreating(false);
+        }
     };
 
     return (
-        <div id="add-btn" onClick={addNote}>
+        <button
+            id="add-btn"
+            type="button"
+            aria-label="Add note"
+            disabled={creating}
+            onClick={addNote}
+        >
             <Plus />
-        </div>
+        </button>
     );
 };
 

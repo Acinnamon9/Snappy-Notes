@@ -1,14 +1,8 @@
-import NotesPage from "./pages/NotesPage";
-import NotesProvider from "./context/NotesContext";
+import { RouterProvider } from "react-router-dom";
+import router from "./app/router";
 
 function App() {
-    return (
-        <div id="app">
-            <NotesProvider>
-                <NotesPage />
-            </NotesProvider>
-        </div>
-    );
+    return <RouterProvider router={router} />;
 }
 
 export default App;

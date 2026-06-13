@@ -1,21 +1,41 @@
+import { useState } from "react";
+
 import Trash from "../icons/Trash";
-import { db } from "../appwrite/databases";
-import { useContext } from "react";
-import { NotesContext } from "../context/NotesContext";
+import { useNotes } from "../context/NotesContext";
 
 const DeleteButton = ({ noteId }) => {
-    const { setNotes } = useContext(NotesContext);
-    const handleDelete = async (e) => {
-        db.notes.delete(noteId);
+    const { deleteNote } = useNotes();
+    const [deleting, setDeleting] = useState(false);
 
-        setNotes((prevState) =>
-            prevState.filter((note) => note.$id !== noteId)
-        );
+    const handleDelete = async (event) => {
+        event.stopPropagation();
+
+        if (deleting) {
+            return;
+        }
+
+        setDeleting(true);
+
+        try {
+            await deleteNote(noteId);
+        } catch (error) {
+            console.error("Failed to delete note:", error);
+            alert("The note could not be deleted.");
+            setDeleting(false);
+        }
     };
+
     return (
-        <div onClick={handleDelete}>
+        <button
+            type="button"
+            className="icon-button"
+            aria-label="Delete note"
+            disabled={deleting}
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={handleDelete}
+        >
             <Trash />
-        </div>
+        </button>
     );
 };
 

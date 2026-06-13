@@ -1,16 +1,16 @@
-import React from "react";
 import AddButton from "./AddButton";
-import colors from "../assets/colors.json";
 import Color from "./Color";
+import colors from "../assets/colors.json";
 
 const Controls = () => {
     return (
-        <div id="controls">
+        <aside id="controls" aria-label="Note controls">
             <AddButton />
+
             {colors.map((color) => (
                 <Color key={color.id} color={color} />
             ))}
-        </div>
+        </aside>
     );
 };
 

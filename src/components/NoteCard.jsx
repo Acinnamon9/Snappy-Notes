@@ -1,103 +1,176 @@
-import { useEffect, useRef, useState } from "react";
-import Trash from "../icons/Trash";
-import { setNewOffset, autoGrow, setZIndex, bodyParser } from "../utils";
-import { db } from "../appwrite/databases";
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+
+import DeleteButton from "./DeleteButton";
 import Spinner from "../icons/Spinner";
-import DeleteButton from "../components/DeleteButton";
-import { useContext } from "react";
-import { NotesContext } from "../context/NotesContext";
+import {
+    autoGrow,
+    bodyParser,
+    parseStoredJson,
+    setNewOffset,
+    setZIndex,
+} from "../utils";
+import { useNotes } from "../context/NotesContext";
+
+const DEFAULT_POSITION = {
+    x: 10,
+    y: 10,
+};
+
+const DEFAULT_COLORS = {
+    colorHeader: "#FFEFBE",
+    colorBody: "#FFF5DF",
+    colorText: "#18181A",
+};
 
 const NoteCard = ({ note }) => {
-    let mouseStartPos = { x: 0, y: 0 };
-    const cardRef = useRef(null);
+    const { setSelectedNoteId, updateNote } = useNotes();
 
-    const { setSelectedNote } = useContext(NotesContext);
+    const cardRef = useRef(null);
+    const textAreaRef = useRef(null);
+    const saveTimerRef = useRef(null);
+    const mouseStartPosition = useRef({
+        x: 0,
+        y: 0,
+    });
 
     const [saving, setSaving] = useState(false);
-    const keyUpTimer = useRef(null);
 
-    const [position, setPosition] = useState(JSON.parse(note.position));
-    const colors = JSON.parse(note.colors);
+    const [position, setPosition] = useState(() =>
+        parseStoredJson(note.position, DEFAULT_POSITION)
+    );
+
+    const colors = parseStoredJson(
+        note.colors,
+        DEFAULT_COLORS
+    );
+
     const body = bodyParser(note.body);
-
-    const textAreaRef = useRef(null);
 
     useEffect(() => {
         autoGrow(textAreaRef);
         setZIndex(cardRef.current);
+
+        return () => {
+            if (saveTimerRef.current) {
+                clearTimeout(saveTimerRef.current);
+            }
+        };
     }, []);
 
-    const mouseDown = (e) => {
-        if (e.target.className === "card-header") {
-            mouseStartPos.x = e.clientX;
-            mouseStartPos.y = e.clientY;
-
-            setZIndex(cardRef.current);
-
-            document.addEventListener("mousemove", mouseMove);
-            document.addEventListener("mouseup", mouseUp);
-            setSelectedNote(note);
-        }
+    const saveData = async (key, value) => {
+        await updateNote(note.$id, {
+            [key]: JSON.stringify(value),
+        });
     };
 
-    const mouseMove = (e) => {
-        const mouseMoveDir = {
-            x: mouseStartPos.x - e.clientX,
-            y: mouseStartPos.y - e.clientY,
+    const handleMouseMove = (event) => {
+        event.preventDefault();
+
+        const mouseMovement = {
+            x: mouseStartPosition.current.x - event.clientX,
+            y: mouseStartPosition.current.y - event.clientY,
         };
 
-        mouseStartPos.x = e.clientX;
-        mouseStartPos.y = e.clientY;
+        mouseStartPosition.current = {
+            x: event.clientX,
+            y: event.clientY,
+        };
 
-        const newPosition = setNewOffset(cardRef.current, mouseMoveDir);
-        setPosition(newPosition);
+        const nextPosition = setNewOffset(
+            cardRef.current,
+            mouseMovement
+        );
+
+        setPosition(nextPosition);
     };
 
-    const mouseUp = async () => {
-        document.removeEventListener("mousemove", mouseMove);
-        document.removeEventListener("mouseup", mouseUp);
+    const handleMouseUp = () => {
+        document.removeEventListener(
+            "mousemove",
+            handleMouseMove
+        );
 
-        const newPosition = setNewOffset(cardRef.current);
-        saveData("position", newPosition);
+        document.removeEventListener(
+            "mouseup",
+            handleMouseUp
+        );
+
+        const nextPosition = setNewOffset(cardRef.current);
+
+        void saveData("position", nextPosition).catch((error) => {
+            console.error("Failed to save note position:", error);
+        });
     };
 
-    const saveData = async (key, value) => {
-        const payload = { [key]: JSON.stringify(value) };
-        console.log("Save data called:", payload);
-        try {
-            await db.notes.update(note.$id, payload);
-        } catch (error) {
-            console.error(error);
+    const handleMouseDown = (event) => {
+        if (event.button !== 0) {
+            return;
         }
-        setSaving(false);
+
+        mouseStartPosition.current = {
+            x: event.clientX,
+            y: event.clientY,
+        };
+
+        setSelectedNoteId(note.$id);
+        setZIndex(cardRef.current);
+
+        document.addEventListener(
+            "mousemove",
+            handleMouseMove
+        );
+
+        document.addEventListener(
+            "mouseup",
+            handleMouseUp
+        );
     };
 
-    const handleKeyUp = async () => {
+    const handleInput = () => {
+        autoGrow(textAreaRef);
         setSaving(true);
-        if (keyUpTimer.current) {
-            clearTimeout(keyUpTimer.current);
+
+        if (saveTimerRef.current) {
+            clearTimeout(saveTimerRef.current);
         }
 
-        keyUpTimer.current = setTimeout(() => {
-            console.log("Timer started");
-            saveData("body", textAreaRef.current.value);
-        }, 2000);
+        saveTimerRef.current = setTimeout(
+            async () => {
+                try {
+                    await saveData(
+                        "body",
+                        textAreaRef.current.value
+                    );
+                } catch (error) {
+                    console.error(
+                        "Failed to save note body:",
+                        error
+                    );
+                } finally {
+                    setSaving(false);
+                }
+            },
+            1200
+        );
     };
 
     return (
-        <div
+        <article
             ref={cardRef}
             className="card"
             style={{
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 backgroundColor: colors.colorBody,
-                
             }}
         >
-            <div
-                onMouseDown={mouseDown}
+            <header
                 className="card-header"
+                onMouseDown={handleMouseDown}
                 style={{
                     backgroundColor: colors.colorHeader,
                 }}
@@ -112,23 +185,24 @@ const NoteCard = ({ note }) => {
                         </span>
                     </div>
                 )}
-            </div>
+            </header>
+
             <div className="card-body">
                 <textarea
-                    onKeyUp={handleKeyUp}
+                    ref={textAreaRef}
+                    defaultValue={body}
+                    aria-label="Note body"
                     onFocus={() => {
                         setZIndex(cardRef.current);
-                        setSelectedNote(note);
+                        setSelectedNoteId(note.$id);
                     }}
-                    onInput={() => {
-                        autoGrow(textAreaRef);
+                    onInput={handleInput}
+                    style={{
+                        color: colors.colorText,
                     }}
-                    ref={textAreaRef}
-                    style={{ color: colors.colorText }}
-                    defaultValue={body}
-                ></textarea>
+                />
             </div>
-        </div>
+        </article>
     );
 };
 
