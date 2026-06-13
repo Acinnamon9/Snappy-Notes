@@ -1,13 +1,15 @@
-import {
+﻿import {
     createBrowserRouter,
     Navigate,
 } from "react-router-dom";
 
-import NotesProvider from "../context/NotesContext";
-import NotesPage from "../pages/NotesPage";
+import ProtectedRoute from "../components/ProtectedRoute";
+import PublicOnlyRoute from "../components/PublicOnlyRoute";
+import NotesProvider from "../context/NotesProvider";
 import LoginPage from "../pages/LoginPage";
-import SettingsPage from "../pages/SettingsPage";
+import NotesPage from "../pages/NotesPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import SettingsPage from "../pages/SettingsPage";
 
 const router = createBrowserRouter([
     {
@@ -17,18 +19,28 @@ const router = createBrowserRouter([
     {
         path: "/notes",
         element: (
-            <NotesProvider>
-                <NotesPage />
-            </NotesProvider>
+            <ProtectedRoute>
+                <NotesProvider>
+                    <NotesPage />
+                </NotesProvider>
+            </ProtectedRoute>
         ),
     },
     {
         path: "/login",
-        element: <LoginPage />,
+        element: (
+            <PublicOnlyRoute>
+                <LoginPage />
+            </PublicOnlyRoute>
+        ),
     },
     {
         path: "/settings",
-        element: <SettingsPage />,
+        element: (
+            <ProtectedRoute>
+                <SettingsPage />
+            </ProtectedRoute>
+        ),
     },
     {
         path: "*",

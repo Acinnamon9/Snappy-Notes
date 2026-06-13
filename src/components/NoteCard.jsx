@@ -1,3 +1,4 @@
+﻿import PropTypes from "prop-types";
 import {
     useEffect,
     useRef,
@@ -13,7 +14,7 @@ import {
     setNewOffset,
     setZIndex,
 } from "../utils";
-import { useNotes } from "../context/NotesContext";
+import { useNotes } from "../context/notesContext";
 
 const DEFAULT_POSITION = {
     x: 10,
@@ -27,7 +28,12 @@ const DEFAULT_COLORS = {
 };
 
 const NoteCard = ({ note }) => {
-    const { setSelectedNoteId, updateNote } = useNotes();
+    const {
+        focusNoteId,
+        setSelectedNoteId,
+        clearFocusNote,
+        updateNote,
+    } = useNotes();
 
     const cardRef = useRef(null);
     const textAreaRef = useRef(null);
@@ -60,6 +66,25 @@ const NoteCard = ({ note }) => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (focusNoteId !== note.$id) {
+            return;
+        }
+
+        const textarea = textAreaRef.current;
+
+        if (!textarea) {
+            return;
+        }
+
+        textarea.focus();
+
+        const caretPosition = textarea.value.length;
+        textarea.setSelectionRange(caretPosition, caretPosition);
+
+        clearFocusNote(note.$id);
+    }, [clearFocusNote, focusNoteId, note.$id]);
 
     const saveData = async (key, value) => {
         await updateNote(note.$id, {
@@ -204,6 +229,15 @@ const NoteCard = ({ note }) => {
             </div>
         </article>
     );
+};
+
+NoteCard.propTypes = {
+    note: PropTypes.shape({
+        $id: PropTypes.string.isRequired,
+        position: PropTypes.string,
+        colors: PropTypes.string,
+        body: PropTypes.string,
+    }).isRequired,
 };
 
 export default NoteCard;

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 
 import Plus from "../icons/Plus";
 import colors from "../assets/colors.json";
-import { useNotes } from "../context/NotesContext";
+import { useNotes } from "../context/notesContext";
 
 const AddButton = () => {
     const { createNote } = useNotes();

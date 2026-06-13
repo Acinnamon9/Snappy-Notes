@@ -1,0 +1,429 @@
+# Selected Project Files
+
+Root: S:/Snappy-Notes
+Generated: 2026-06-14 01:35:33
+
+
+========================================================================================
+FILE: src/components/AddButton.jsx
+========================================================================================
+   1 | import { useRef, useState } from "react";
+   2 | 
+   3 | import Plus from "../icons/Plus";
+   4 | import colors from "../assets/colors.json";
+   5 | import { useNotes } from "../context/NotesContext";
+   6 | 
+   7 | const AddButton = () => {
+   8 |     const { createNote } = useNotes();
+   9 |     const startingPosition = useRef(10);
+  10 |     const [creating, setCreating] = useState(false);
+  11 | 
+  12 |     const addNote = async () => {
+  13 |         if (creating) {
+  14 |             return;
+  15 |         }
+  16 | 
+  17 |         const payload = {
+  18 |             body: JSON.stringify(""),
+  19 |             position: JSON.stringify({
+  20 |                 x: startingPosition.current,
+  21 |                 y: startingPosition.current,
+  22 |             }),
+  23 |             colors: JSON.stringify(colors[0]),
+  24 |         };
+  25 | 
+  26 |         setCreating(true);
+  27 | 
+  28 |         try {
+  29 |             await createNote(payload);
+  30 |             startingPosition.current += 10;
+  31 |         } catch (error) {
+  32 |             console.error("Failed to create note:", error);
+  33 |             alert("The note could not be created.");
+  34 |         } finally {
+  35 |             setCreating(false);
+  36 |         }
+  37 |     };
+  38 | 
+  39 |     return (
+  40 |         <button
+  41 |             id="add-btn"
+  42 |             type="button"
+  43 |             aria-label="Add note"
+  44 |             disabled={creating}
+  45 |             onClick={addNote}
+  46 |         >
+  47 |             <Plus />
+  48 |         </button>
+  49 |     );
+  50 | };
+  51 | 
+  52 | export default AddButton;
+
+========================================================================================
+FILE: src/components/NoteCard.jsx
+========================================================================================
+   1 | ﻿import PropTypes from "prop-types";
+   2 | import {
+   3 |     useEffect,
+   4 |     useRef,
+   5 |     useState,
+   6 | } from "react";
+   7 | 
+   8 | import DeleteButton from "./DeleteButton";
+   9 | import Spinner from "../icons/Spinner";
+  10 | import {
+  11 |     autoGrow,
+  12 |     bodyParser,
+  13 |     parseStoredJson,
+  14 |     setNewOffset,
+  15 |     setZIndex,
+  16 | } from "../utils";
+  17 | import { useNotes } from "../context/notesContext";
+  18 | 
+  19 | const DEFAULT_POSITION = {
+  20 |     x: 10,
+  21 |     y: 10,
+  22 | };
+  23 | 
+  24 | const DEFAULT_COLORS = {
+  25 |     colorHeader: "#FFEFBE",
+  26 |     colorBody: "#FFF5DF",
+  27 |     colorText: "#18181A",
+  28 | };
+  29 | 
+  30 | const NoteCard = ({ note }) => {
+  31 |     const { setSelectedNoteId, updateNote } = useNotes();
+  32 | 
+  33 |     const cardRef = useRef(null);
+  34 |     const textAreaRef = useRef(null);
+  35 |     const saveTimerRef = useRef(null);
+  36 |     const mouseStartPosition = useRef({
+  37 |         x: 0,
+  38 |         y: 0,
+  39 |     });
+  40 | 
+  41 |     const [saving, setSaving] = useState(false);
+  42 | 
+  43 |     const [position, setPosition] = useState(() =>
+  44 |         parseStoredJson(note.position, DEFAULT_POSITION)
+  45 |     );
+  46 | 
+  47 |     const colors = parseStoredJson(
+  48 |         note.colors,
+  49 |         DEFAULT_COLORS
+  50 |     );
+  51 | 
+  52 |     const body = bodyParser(note.body);
+  53 | 
+  54 |     useEffect(() => {
+  55 |         autoGrow(textAreaRef);
+  56 |         setZIndex(cardRef.current);
+  57 | 
+  58 |         return () => {
+  59 |             if (saveTimerRef.current) {
+  60 |                 clearTimeout(saveTimerRef.current);
+  61 |             }
+  62 |         };
+  63 |     }, []);
+  64 | 
+  65 |     const saveData = async (key, value) => {
+  66 |         await updateNote(note.$id, {
+  67 |             [key]: JSON.stringify(value),
+  68 |         });
+  69 |     };
+  70 | 
+  71 |     const handleMouseMove = (event) => {
+  72 |         event.preventDefault();
+  73 | 
+  74 |         const mouseMovement = {
+  75 |             x: mouseStartPosition.current.x - event.clientX,
+  76 |             y: mouseStartPosition.current.y - event.clientY,
+  77 |         };
+  78 | 
+  79 |         mouseStartPosition.current = {
+  80 |             x: event.clientX,
+  81 |             y: event.clientY,
+  82 |         };
+  83 | 
+  84 |         const nextPosition = setNewOffset(
+  85 |             cardRef.current,
+  86 |             mouseMovement
+  87 |         );
+  88 | 
+  89 |         setPosition(nextPosition);
+  90 |     };
+  91 | 
+  92 |     const handleMouseUp = () => {
+  93 |         document.removeEventListener(
+  94 |             "mousemove",
+  95 |             handleMouseMove
+  96 |         );
+  97 | 
+  98 |         document.removeEventListener(
+  99 |             "mouseup",
+ 100 |             handleMouseUp
+ 101 |         );
+ 102 | 
+ 103 |         const nextPosition = setNewOffset(cardRef.current);
+ 104 | 
+ 105 |         void saveData("position", nextPosition).catch((error) => {
+ 106 |             console.error("Failed to save note position:", error);
+ 107 |         });
+ 108 |     };
+ 109 | 
+ 110 |     const handleMouseDown = (event) => {
+ 111 |         if (event.button !== 0) {
+ 112 |             return;
+ 113 |         }
+ 114 | 
+ 115 |         mouseStartPosition.current = {
+ 116 |             x: event.clientX,
+ 117 |             y: event.clientY,
+ 118 |         };
+ 119 | 
+ 120 |         setSelectedNoteId(note.$id);
+ 121 |         setZIndex(cardRef.current);
+ 122 | 
+ 123 |         document.addEventListener(
+ 124 |             "mousemove",
+ 125 |             handleMouseMove
+ 126 |         );
+ 127 | 
+ 128 |         document.addEventListener(
+ 129 |             "mouseup",
+ 130 |             handleMouseUp
+ 131 |         );
+ 132 |     };
+ 133 | 
+ 134 |     const handleInput = () => {
+ 135 |         autoGrow(textAreaRef);
+ 136 |         setSaving(true);
+ 137 | 
+ 138 |         if (saveTimerRef.current) {
+ 139 |             clearTimeout(saveTimerRef.current);
+ 140 |         }
+ 141 | 
+ 142 |         saveTimerRef.current = setTimeout(
+ 143 |             async () => {
+ 144 |                 try {
+ 145 |                     await saveData(
+ 146 |                         "body",
+ 147 |                         textAreaRef.current.value
+ 148 |                     );
+ 149 |                 } catch (error) {
+ 150 |                     console.error(
+ 151 |                         "Failed to save note body:",
+ 152 |                         error
+ 153 |                     );
+ 154 |                 } finally {
+ 155 |                     setSaving(false);
+ 156 |                 }
+ 157 |             },
+ 158 |             1200
+ 159 |         );
+ 160 |     };
+ 161 | 
+ 162 |     return (
+ 163 |         <article
+ 164 |             ref={cardRef}
+ 165 |             className="card"
+ 166 |             style={{
+ 167 |                 left: `${position.x}px`,
+ 168 |                 top: `${position.y}px`,
+ 169 |                 backgroundColor: colors.colorBody,
+ 170 |             }}
+ 171 |         >
+ 172 |             <header
+ 173 |                 className="card-header"
+ 174 |                 onMouseDown={handleMouseDown}
+ 175 |                 style={{
+ 176 |                     backgroundColor: colors.colorHeader,
+ 177 |                 }}
+ 178 |             >
+ 179 |                 <DeleteButton noteId={note.$id} />
+ 180 | 
+ 181 |                 {saving && (
+ 182 |                     <div className="card-saving">
+ 183 |                         <Spinner color={colors.colorText} />
+ 184 |                         <span style={{ color: colors.colorText }}>
+ 185 |                             Saving...
+ 186 |                         </span>
+ 187 |                     </div>
+ 188 |                 )}
+ 189 |             </header>
+ 190 | 
+ 191 |             <div className="card-body">
+ 192 |                 <textarea
+ 193 |                     ref={textAreaRef}
+ 194 |                     defaultValue={body}
+ 195 |                     aria-label="Note body"
+ 196 |                     onFocus={() => {
+ 197 |                         setZIndex(cardRef.current);
+ 198 |                         setSelectedNoteId(note.$id);
+ 199 |                     }}
+ 200 |                     onInput={handleInput}
+ 201 |                     style={{
+ 202 |                         color: colors.colorText,
+ 203 |                     }}
+ 204 |                 />
+ 205 |             </div>
+ 206 |         </article>
+ 207 |     );
+ 208 | };
+ 209 | 
+ 210 | NoteCard.propTypes = {
+ 211 |     note: PropTypes.shape({
+ 212 |         $id: PropTypes.string.isRequired,
+ 213 |         position: PropTypes.string,
+ 214 |         colors: PropTypes.string,
+ 215 |         body: PropTypes.string,
+ 216 |     }).isRequired,
+ 217 | };
+ 218 | 
+ 219 | export default NoteCard;
+
+========================================================================================
+FILE: src/context/NotesProvider.jsx
+========================================================================================
+   1 | ﻿import PropTypes from "prop-types";
+   2 | import {
+   3 |     useCallback,
+   4 |     useEffect,
+   5 |     useMemo,
+   6 |     useState,
+   7 | } from "react";
+   8 | 
+   9 | import Spinner from "../icons/Spinner";
+  10 | import { notesService } from "../services/notesService";
+  11 | import { useAuth } from "./authContext";
+  12 | import { NotesContext } from "./notesContext";
+  13 | 
+  14 | const NotesProvider = ({ children }) => {
+  15 |     const { user } = useAuth();
+  16 | 
+  17 |     const [notes, setNotes] = useState([]);
+  18 |     const [selectedNoteId, setSelectedNoteId] = useState(null);
+  19 |     const [loading, setLoading] = useState(true);
+  20 |     const [loadError, setLoadError] = useState(null);
+  21 | 
+  22 |     const loadNotes = useCallback(async () => {
+  23 |         setLoading(true);
+  24 |         setLoadError(null);
+  25 | 
+  26 |         try {
+  27 |             const loadedNotes = await notesService.list();
+  28 |             setNotes(loadedNotes);
+  29 |         } catch (error) {
+  30 |             console.error("Failed to load notes:", error);
+  31 |             setLoadError(error);
+  32 |         } finally {
+  33 |             setLoading(false);
+  34 |         }
+  35 |     }, []);
+  36 | 
+  37 |     useEffect(() => {
+  38 |         void loadNotes();
+  39 |     }, [loadNotes]);
+  40 | 
+  41 |     const createNote = useCallback(
+  42 |         async (payload) => {
+  43 |             const createdNote = await notesService.create(
+  44 |                 payload,
+  45 |                 user.$id
+  46 |             );
+  47 | 
+  48 |             setNotes((currentNotes) => [
+  49 |                 createdNote,
+  50 |                 ...currentNotes,
+  51 |             ]);
+  52 | 
+  53 |             return createdNote;
+  54 |         },
+  55 |         [user]
+  56 |     );
+  57 | 
+  58 |     const updateNote = useCallback(async (id, payload) => {
+  59 |         const updatedNote = await notesService.update(id, payload);
+  60 | 
+  61 |         setNotes((currentNotes) =>
+  62 |             currentNotes.map((note) =>
+  63 |                 note.$id === id
+  64 |                     ? { ...note, ...updatedNote }
+  65 |                     : note
+  66 |             )
+  67 |         );
+  68 | 
+  69 |         return updatedNote;
+  70 |     }, []);
+  71 | 
+  72 |     const deleteNote = useCallback(async (id) => {
+  73 |         await notesService.remove(id);
+  74 | 
+  75 |         setNotes((currentNotes) =>
+  76 |             currentNotes.filter((note) => note.$id !== id)
+  77 |         );
+  78 | 
+  79 |         setSelectedNoteId((currentId) =>
+  80 |             currentId === id ? null : currentId
+  81 |         );
+  82 |     }, []);
+  83 | 
+  84 |     const contextValue = useMemo(
+  85 |         () => ({
+  86 |             notes,
+  87 |             selectedNoteId,
+  88 |             setSelectedNoteId,
+  89 |             createNote,
+  90 |             updateNote,
+  91 |             deleteNote,
+  92 |             reloadNotes: loadNotes,
+  93 |         }),
+  94 |         [
+  95 |             notes,
+  96 |             selectedNoteId,
+  97 |             createNote,
+  98 |             updateNote,
+  99 |             deleteNote,
+ 100 |             loadNotes,
+ 101 |         ]
+ 102 |     );
+ 103 | 
+ 104 |     if (loading) {
+ 105 |         return (
+ 106 |             <div className="page-state">
+ 107 |                 <Spinner size="64" />
+ 108 |                 <p>Loading notes...</p>
+ 109 |             </div>
+ 110 |         );
+ 111 |     }
+ 112 | 
+ 113 |     if (loadError) {
+ 114 |         return (
+ 115 |             <div className="page-state">
+ 116 |                 <h1>Could not load notes</h1>
+ 117 |                 <p>{loadError.message || "The notes request failed."}</p>
+ 118 | 
+ 119 |                 <button
+ 120 |                     type="button"
+ 121 |                     className="primary-button"
+ 122 |                     onClick={loadNotes}
+ 123 |                 >
+ 124 |                     Try again
+ 125 |                 </button>
+ 126 |             </div>
+ 127 |         );
+ 128 |     }
+ 129 | 
+ 130 |     return (
+ 131 |         <NotesContext.Provider value={contextValue}>
+ 132 |             {children}
+ 133 |         </NotesContext.Provider>
+ 134 |     );
+ 135 | };
+ 136 | 
+ 137 | NotesProvider.propTypes = {
+ 138 |     children: PropTypes.node.isRequired,
+ 139 | };
+ 140 | 
+ 141 | export default NotesProvider;

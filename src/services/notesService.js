@@ -1,4 +1,15 @@
+﻿import {
+    Permission,
+    Role,
+} from "appwrite";
+
 import { db } from "../appwrite/databases";
+
+const getPrivateNotePermissions = (userId) => [
+    Permission.read(Role.user(userId)),
+    Permission.update(Role.user(userId)),
+    Permission.delete(Role.user(userId)),
+];
 
 export const notesService = {
     async list() {
@@ -6,8 +17,18 @@ export const notesService = {
         return response.documents;
     },
 
-    async create(payload) {
-        return db.notes.create(payload);
+    async create(payload, userId) {
+        if (!userId) {
+            throw new Error(
+                "A signed-in user is required to create a note."
+            );
+        }
+
+        return db.notes.create(
+            payload,
+            undefined,
+            getPrivateNotePermissions(userId)
+        );
     },
 
     async update(id, payload) {

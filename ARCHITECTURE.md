@@ -46,3 +46,23 @@ UI components do not import the Appwrite database directly.
 
 `NotesBoard.jsx` owns the board layout. The dark grid and scrolling
 belong to `.notes-board`, not to the root application element.
+## Authentication
+
+`AuthContext.jsx` restores the Appwrite browser session and owns
+registration, login, logout, and the current user.
+
+`authService.js` is the boundary between React and Appwrite Account.
+Pages and route guards do not call the Account SDK directly.
+
+`ProtectedRoute.jsx` protects `/notes` and `/settings`.
+`PublicOnlyRoute.jsx` redirects signed-in users away from `/login`.
+
+## Note privacy
+
+The notes collection uses document security. Authenticated users receive
+collection-level create permission, while each note receives read, update,
+and delete permissions for its creator only.
+
+Appwrite permissions, rather than a client-side owner filter, enforce
+privacy. Document lists therefore return only notes the current user is
+allowed to read.

@@ -1,7 +1,8 @@
+﻿import PropTypes from "prop-types";
 import { useState } from "react";
 
 import Trash from "../icons/Trash";
-import { useNotes } from "../context/NotesContext";
+import { useNotes } from "../context/notesContext";
 
 const DeleteButton = ({ noteId }) => {
     const { deleteNote } = useNotes();
@@ -37,6 +38,10 @@ const DeleteButton = ({ noteId }) => {
             <Trash />
         </button>
     );
+};
+
+DeleteButton.propTypes = {
+    noteId: PropTypes.string.isRequired,
 };
 
 export default DeleteButton;

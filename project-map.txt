@@ -1,0 +1,89 @@
+﻿# Project Map
+
+Root: S:\Snappy-Notes
+Generated: 2026-06-14 01:05:04
+
+Git branch: main
+Latest commit: 7b0bf14 Refactor routing and notes architecture (2026-06-14)
+
+## Git status
+
+ M project_context.txt
+ D snappy-notes-refactor.ps1
+?? SnappyNotes-ProjectTools.ps1
+
+## Structure
+
+- .env.example
+- .eslintrc.cjs
+- .gitignore
+- ARCHITECTURE.md
+- demo.gif
+- demo.mov
+- index.html
+- package.json
+- package-lock.json
+- project_context.txt
+- public/
+  - vite.svg
+- README.md
+- SnappyNotes-ProjectTools.ps1
+- src/
+  - App.jsx
+  - app/
+    - router.jsx
+  - appwrite/
+    - config.js
+    - databases.js
+  - assets/
+    - colors.json
+    - fakeData.js
+    - react.svg
+  - components/
+    - AddButton.jsx
+    - Color.jsx
+    - Controls.jsx
+    - DeleteButton.jsx
+    - NoteCard.jsx
+    - NotesBoard.jsx
+  - context/
+    - NotesContext.jsx
+  - icons/
+    - Plus.jsx
+    - Spinner.jsx
+    - Trash.jsx
+  - index.css
+  - main.jsx
+  - pages/
+    - LoginPage.jsx
+    - NotesPage.jsx
+    - NotFoundPage.jsx
+    - SettingsPage.jsx
+  - services/
+    - notesService.js
+  - utils.js
+- vite.config.js
+
+## package.json summary
+
+Name: snappy-notes
+
+Scripts:
+  dev: vite
+  build: vite build
+  lint: eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0
+  preview: vite preview
+
+Dependencies:
+  - @types/react
+  - @types/react-dom
+  - @vitejs/plugin-react
+  - appwrite
+  - eslint
+  - eslint-plugin-react
+  - eslint-plugin-react-hooks
+  - eslint-plugin-react-refresh
+  - react
+  - react-dom
+  - react-router-dom
+  - vite

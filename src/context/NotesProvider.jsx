@@ -1,7 +1,6 @@
+﻿import PropTypes from "prop-types";
 import {
-    createContext,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useState,
@@ -9,22 +8,15 @@ import {
 
 import Spinner from "../icons/Spinner";
 import { notesService } from "../services/notesService";
-
-export const NotesContext = createContext(null);
-
-export const useNotes = () => {
-    const context = useContext(NotesContext);
-
-    if (!context) {
-        throw new Error("useNotes must be used inside NotesProvider");
-    }
-
-    return context;
-};
+import { useAuth } from "./authContext";
+import { NotesContext } from "./notesContext";
 
 const NotesProvider = ({ children }) => {
+    const { user } = useAuth();
+
     const [notes, setNotes] = useState([]);
     const [selectedNoteId, setSelectedNoteId] = useState(null);
+    const [focusNoteId, setFocusNoteId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState(null);
 
@@ -47,16 +39,25 @@ const NotesProvider = ({ children }) => {
         void loadNotes();
     }, [loadNotes]);
 
-    const createNote = useCallback(async (payload) => {
-        const createdNote = await notesService.create(payload);
+    const createNote = useCallback(
+        async (payload) => {
+            const createdNote = await notesService.create(
+                payload,
+                user.$id
+            );
 
-        setNotes((currentNotes) => [
-            createdNote,
-            ...currentNotes,
-        ]);
+            setNotes((currentNotes) => [
+                createdNote,
+                ...currentNotes,
+            ]);
 
-        return createdNote;
-    }, []);
+            setSelectedNoteId(createdNote.$id);
+            setFocusNoteId(createdNote.$id);
+
+            return createdNote;
+        },
+        [user]
+    );
 
     const updateNote = useCallback(async (id, payload) => {
         const updatedNote = await notesService.update(id, payload);
@@ -82,13 +83,25 @@ const NotesProvider = ({ children }) => {
         setSelectedNoteId((currentId) =>
             currentId === id ? null : currentId
         );
+
+        setFocusNoteId((currentId) =>
+            currentId === id ? null : currentId
+        );
+    }, []);
+
+    const clearFocusNote = useCallback((id) => {
+        setFocusNoteId((currentId) =>
+            currentId === id ? null : currentId
+        );
     }, []);
 
     const contextValue = useMemo(
         () => ({
             notes,
             selectedNoteId,
+            focusNoteId,
             setSelectedNoteId,
+            clearFocusNote,
             createNote,
             updateNote,
             deleteNote,
@@ -97,6 +110,8 @@ const NotesProvider = ({ children }) => {
         [
             notes,
             selectedNoteId,
+            focusNoteId,
+            clearFocusNote,
             createNote,
             updateNote,
             deleteNote,
@@ -135,6 +150,10 @@ const NotesProvider = ({ children }) => {
             {children}
         </NotesContext.Provider>
     );
+};
+
+NotesProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export default NotesProvider;

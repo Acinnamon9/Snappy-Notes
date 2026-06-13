@@ -1,4 +1,4 @@
-import React from "react";
+﻿import PropTypes from "prop-types";
 
 const Spinner = ({ color = "#fff", size = "20" }) => {
     return (
@@ -16,9 +16,17 @@ const Spinner = ({ color = "#fff", size = "20" }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M12 20c-4.416 0-8-3.584-8-8s4.448-7.112 4.448-7.112m0 0v3.616m0-3.616h-4M12 4c4.416 0 8 3.552 8 8 0 5.336-4.448 8-4.448 8m0 0h4m-4 0v-3.552"
-            ></path>
+            />
         </svg>
     );
+};
+
+Spinner.propTypes = {
+    color: PropTypes.string,
+    size: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+    ]),
 };
 
 export default Spinner;

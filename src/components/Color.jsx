@@ -1,6 +1,7 @@
+﻿import PropTypes from "prop-types";
 import { useState } from "react";
 
-import { useNotes } from "../context/NotesContext";
+import { useNotes } from "../context/notesContext";
 
 const Color = ({ color }) => {
     const { selectedNoteId, updateNote } = useNotes();
@@ -43,6 +44,13 @@ const Color = ({ color }) => {
             }}
         />
     );
+};
+
+Color.propTypes = {
+    color: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        colorHeader: PropTypes.string.isRequired,
+    }).isRequired,
 };
 
 export default Color;

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import PropTypes from "prop-types";
 
 const Plus = ({ size = "24", color = "#FFFFFF" }) => {
     return (
@@ -11,9 +11,20 @@ const Plus = ({ size = "24", color = "#FFFFFF" }) => {
             fill="none"
             strokeWidth="2.5"
         >
-            <path strokeLinecap="round" d="M18 12H6M12 6v12"></path>
+            <path
+                strokeLinecap="round"
+                d="M18 12H6M12 6v12"
+            />
         </svg>
     );
+};
+
+Plus.propTypes = {
+    size: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+    ]),
+    color: PropTypes.string,
 };
 
 export default Plus;
